@@ -1,0 +1,45 @@
+* Introduction
+
+Hi all!
+
+My name is Calvin and I'm here to talk to you about a couple of things
+-- mostly types, and the correctness of programs! My job right now is
+to convince you of two things.
+
+1) That you should care, and that you NEED to care. Computers are undeniably an
+   integral part of *every* aspect of our lives. Your bank account,
+   car, traffic lights, any airplane you get on, and even the elevator
+   that you might have taken today, or the pacemaker you or a loved
+   one may have. They all have computers in them, and they all run
+   software.
+
+   All of these devices and the programs on them need to be working
+   correctly. They need to work correctly not just because it's
+   annoying otherwise.
+
+2) and the second thing that I want to convince you of is that types
+   are a good way to do this!
+
+
+* The types you may have seen
+
+** Java types
+
+These are very verbose, and get in the way a lot. The other problem is
+that they don't actually offer much safety. For instance almost any
+operation you do on a java type may cause an exception at runtime
+because null inhabits every type.
+
+These types also aren't super expressive or easy to work with.
+
+** Python
+
+Dynamic types. Why would you ever want the type of something to change?
+
+Dynamic types are essentially a mediocre solution to the type inference problem.
+
+** JavaScript
+
+Just no.
+
+*
