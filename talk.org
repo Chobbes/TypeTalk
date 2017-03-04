@@ -15,31 +15,380 @@ to convince you of two things.
 
    All of these devices and the programs on them need to be working
    correctly. They need to work correctly not just because it's
-   annoying otherwise.
+   annoying otherwise, but because it really is life or death in many
+   cases.
 
 2) and the second thing that I want to convince you of is that types
-   are a good way to do this!
+   are a good way to help you write correct programs.
 
+This is going to be somewhat of a whirlwind introduction to the world
+of types, so if you get lost along the way that's okay. Just let me
+know and hopefully I can clarify things along the way, and if I can't
+do that in the allotted time, don't fret! Talk to me after the fact!
+Sometimes it takes a while to grok mathy stuff!
+
+* What are we trying to solve?
+
+You think that this is a normal, and necessary thing:
+
+# picture of various runtime exceptions.
+
+That's bad. Runtime exceptions don't actually /have/ to exist.
+
+* What are types?
+
+Most have you have probably encountered some form of type
+system. Types tell you which values anything in your program can take
+on. This also tells you what operations are permitted on a value of a
+certain type.
+
+Types can be excellent documentation, telling you pretty much exactly
+what a function can do. Types can also catch a lot of errors and
+mistakes. After all, now that the compiler knows how you intend to use
+a variable, it can tell you when you're using it in a strange way by
+mistake!
+
+In fact a well designed type system can make it so that you don't have
+runtime exceptions, because all operations on the values that you have
+are well defined.
 
 * The types you may have seen
 
-** Java types
+So, I want to quickly address some of what you may have seen before
+because these things may have tainted your impression of types!
 
-These are very verbose, and get in the way a lot. The other problem is
-that they don't actually offer much safety. For instance almost any
-operation you do on a java type may cause an exception at runtime
-because null inhabits every type.
+* What is a type?
 
-These types also aren't super expressive or easy to work with.
+  You've probably heard of types in programming languages, and
+  probably even used them. Most of the time you see them in the
+  context of "it tells the compiler how to store the value in memory",
+  and while that's true it's not the entire picture.
+
+  Over the years in computing science and mathematics we've learned
+  that types are good for a lot more than just figuring out how to lay
+  out bits in memory. They tell us how you can use values -- can these
+  things be added together, can this function take this value as an
+  argument? This seems a bit silly to some "I'll use my values however
+  I like, dammit!" But it can help keep us on track, and write
+  programs that make sense! A type checker can be used to reject
+  programs which consist of nonsense like $357^{circles}$, and in fact
+  types can eliminate entire classes of errors if designed properly.
+
+* The types you may have seen.
+
+  You might have already seen how a few languages use types. Let's discuss some of them quickly!
 
 ** Python
+   In Python we might have something like this:
 
-Dynamic types. Why would you ever want the type of something to change?
+   #+BEGIN_SRC python
+     def my_sort(xs):
+         if xs == []:
+             return xs
+         else:
+             head = xs[0]
+             rest = xs[1:]
 
-Dynamic types are essentially a mediocre solution to the type inference problem.
+             smaller = my_sort([x for x in rest if x <= head])
+             larger = my_sort([x for x in rest if x > head])
 
-** JavaScript
+             return smaller + [head] + larger
 
-Just no.
 
-*
+     def my_factorial(n):
+         if n == 0:
+             return 1
+         else:
+             return n * my_factorial(n-1)
+   #+END_SRC
+
+   Python likes to pretend that types aren't a thing, so Python
+   doesn't really tell us anything about what a function like this can
+   do. We can pass this function whatever we want as an argument, and
+   it may or may not fail -- we don't know until we run the program or
+   read it very carefully.
+
+   Naming and documentation can help, but in practice enforcing good
+   naming and documentation is nearly impossible. It just can't be
+   done automatically.
+
+   In a large code base it's difficult to even know what you should
+   pass to a function. Should it take a list, or a set? Should it take
+   an int, or a float? This factorial function only works with ints (a
+   non-integer number will never trigger the base case), but you might
+   not realize you're calling it with floats until it's too late! Can
+   you simply pass the result of another function to this one, or
+   might that function return None, which this factorial function
+   can't handle?  You can't know for sure until you read what that
+   other function does, and what every function that function calls
+   does. That's a lot of work!  You can run your program, perhaps with
+   a suite of tests, but that can easily miss a special case.
+
+   Another concern is that this function could do a bunch of other
+   stuff. It could throw away the argument, and read in an integer
+   from some file -- maybe it will crash if that file doesn't exist!
+   It could change the value of some global variable, causing it to
+   return different values depending on the last time it was called --
+   and this might even cause other functions to behave
+   differently. This can make your program a complicated web of
+   states, which is really difficult to wrap your head around because
+   you need to understand it in its entirety -- calling any function
+   could have a drastic effect on the behavior of your program. We've
+   all been here, and it's awful! Often better to rewrite the program
+   than it is to debug it! It would be nice to keep things separated
+   into nice modular compartments that don't affect each other. That's
+   what functions are supposed to do, but very often they rely upon
+   outside state so they're not actually compartmentalized.
+
+   What if we could force functions to be compartmentalized so we
+   can't make these mistakes!? What if we could express what a
+   function can and can't do in a concise format, and then have the
+   compiler or interpreter tell us when something could go wrong! Why
+   should we accept runtime exceptions when we can catch these
+   problems early on!?
+
+   Just a hint, but this is very possible! And we're going to do it
+   will types!
+
+** Java
+
+   In languages like Java you have to specify the types of things:
+
+   #+BEGIN_SRC java
+     Integer factorial(Integer n) {
+         if (n == 0) {
+             return 1;
+         }
+         else {
+             return n * factorial(n - 1);
+         }
+     }
+
+     ArrayList<Integer> my_sort(ArrayList<Integer> xs) {
+         if (xs.size() == 0) {
+             return new ArrayList<Integer>();
+         }
+         else {
+             ...
+         }
+     }
+   #+END_SRC
+
+   This little bit of added verbosity actually helps us a lot! We
+   don't run into issues with non-termination when we accidentally
+   pass in a floating point value like 3.1, and we get to know a
+   little bit about what this function can do -- we can see from the
+   types that it takes an integer value, and returns an integer value.
+
+   Some languages that do this kind of thing will perform implicit
+   type conversions. If we call ~factorial(3.1)~ these languages might
+   convert the floating point number 3.1 to the integer value 3
+   without telling us about it. This might seem convenient, but
+   sometimes this can lead to really nasty and hard to track down bugs
+   when you think you're doing one thing, but the language is hiding
+   these sneaky conversions behind the scenes. I'm of the opinion that
+   it's better to explicitly convert the values -- you don't actually
+   want to do conversions that often, and when you do it's better to
+   know when it's happening, otherwise you might end up with
+   unexpected behavior.
+
+   Even this Java example has problems. For instance Java is a
+   language with null references. A variable of any type in Java (save
+   for some primitive types) can have the value `null` assigned to
+   it. You've probably seen `null` in languages before, even Python
+   sort of has this with `None`. The problem with `null` inhabiting
+   every type is that it behaves very poorly with almost every
+   operation. Comparing `null` to 0 could lead to a runtime
+   exception. Subtracting 1 from `null` would lead to a runtime
+   exception. We don't want runtime exceptions, since we might not
+   catch them until our application is running in production! It would
+   be great if the compiler could tell us when we're doing something
+   that doesn't make sense like comparing a null value to an
+   integer. Sometimes it makes sense to have `None` values, since a
+   computation could have no solution, or fail for some reason, but we
+   need the compiler to ensure that we check for these cases. We are
+   notoriously bad at checking for null references, and it's
+   particularly difficult and verbose when every variable can be null.
+
+   Which leads us to the issue that a lot of people don't like
+   declaring types for all of their variables, thinking that this is a
+   tedious task when the compiler can clearly see that 3 is an
+   integer. We'll see shortly that this extra syntax can be avoided
+   most of the time with "type inference", and that when we do choose
+   to write types it can actually make writing our programs easier and
+   quicker. There's really no excuse not to have types!
+
+   Languages like Java are what you might think of when you think of
+   types, and maybe that makes you think types are bad. I assure you
+   that it's Java that's wrong, and not the types!
+
+* A better idea
+
+  Alright, so there are a few things that can make types better for
+  us. First of all we should identify some important qualities that we
+  want.
+
+  - Catch errors at compile time. If something is "wrong", why wait for the program to run to tell us?
+  - Ease reading and writing programs.
+  - Allow us to specify properties, and guarantees within our programs. E.g., this function does not alter global state, or read from a file.
+
+** Haskell
+
+   So, our trip through the land of types brings us to
+   Haskell. Haskell is a programming language which treats types
+   well. The syntax may be a little different than what you're used
+   to, but it's surprisingly clean, concise, and precise. It's quite a
+   mathematical language.
+
+   Recall the Python programs from early:
+
+   #+BEGIN_SRC python
+     def my_sort(xs):
+         if xs == []:
+             return xs
+         else:
+             head = xs[0]
+             rest = xs[1:]
+
+             smaller = my_sort([x for x in rest if x <= head])
+             larger = my_sort([x for x in rest if x > head])
+
+             return smaller + [head] + larger
+
+
+     def my_factorial(n):
+         if n == 0:
+             return 1
+         else:
+             return n * my_factorial(n-1)
+   #+END_SRC
+
+   These might look like this in Haskell
+
+   #+BEGIN_SRC haskell
+     mySort :: Ord a => [a] -> [a]
+     mySort [] = []
+     mySort (head::rest) = smaller ++ [head] ++ larger
+       where smaller = mySort [x | x <- rest, x <= head]
+             larger = mySort [x | x <- rest, x > head]
+
+
+     factorial :: Integer -> Integer
+     factorial 0 = 1
+     factorial n = n * factorial (n - 1)
+   #+END_SRC
+
+   This actually looks pretty nice! In each of these functions it does
+   what's called pattern matching to break down the different
+   cases. You hardly have to write any type signatures at all, but
+   it's useful to write the top level signatures that you see here as
+   it helps guide you when writing the function -- it acts as a little
+   specification and the compiler can tell you if you deviate.
+
+   In the sort function you'll see what's called a typeclass
+   constraint, "Ord", and a type variable "a". This means that "a" can
+   be any type as long as it implements the functions in "Ord", which
+   stands for "ordered" and contains things like "less than", "equal
+   to", and "greater than" comparisons.
+
+   This is great, because now we know exactly what we can do with the
+   elements of the list passed into the sort function! We can compare
+   them, and since they have an ordering we can sort them!
+
+   Haskell is also a bit more strict about what its types mean. For
+   instance we know that these functions can't return "None" or
+   "null". In the case of the factorial function it MUST return an
+   integer value of some kind, and in Haskell there is no "None" or
+   "null" value under the Integer type.
+
+   These "Nothing" values are enconded in so-called "Maybe" types,
+   i.e., types which may contain just a value of a given type, or may
+   yield Nothing.
+
+   #+BEGIN_SRC haskell
+     -- Find out where a value is in a function.
+     getIndex :: Eq a => a -> [a] -> Maybe Integer
+     getIndex = getIndexAcc 0
+
+     -- Helper function that remembers our position in the list.
+     getIndexAcc :: Eq a => Integer -> a -> [a] -> Maybe Integer
+     getIndexAcc pos value [] = Nothing
+     getIndexAcc pos value (x::xs) = if x == value
+                                        then Just pos
+                                        else getIndexAcc (pos+1) xs
+            
+
+     -- A dictionary of all the important words.
+     dictionary :: [String]
+     dictionary = ["cats", "sandwiches", "hot chocolate"]
+
+
+     main :: IO ()
+     main = do entry <- getLine
+               case getIndex entry dictionary of
+                    (Just pos) => putStrLn "Your entry is at position " ++ show pos ++ " in the dictionary."
+                    Nothing => putStrLn "Your entry does not appear in the dictionary."
+   #+END_SRC
+
+   In this case you know that "getIndex" can return something like a
+   "null" value called "Nothing", but it could also return "Just" an
+   Integer. You have to explicitly unwrap these values, like in the
+   case statement, to get at the possible value.
+
+   This example also shows how input and output which are encoded in the
+   types. For example:
+
+   #+BEGIN_SRC haskell
+     -- putStr :: IO ()
+     -- getLine :: IO String
+
+     main :: IO ()
+     main = do putStr "What is your name? "
+               name <- getLine
+               putStrLn ("Hello, " ++ name)
+   #+END_SRC
+
+   The ()'s essentially mean "void" or "no return value". Also the
+   dashes are comments. An "IO String" for example is a function which
+   gets a string value using IO. A function which computes its return
+   value based on an IO action will be forced to have an IO type as
+   well, so you can't hide IO actions in functions which supposedly
+   don't rely upon IO.
+
+   It seems that Haskell satisfies most of our goals.
+
+   1. Catch errors at compile time. If something is "wrong", why wait for the program to run to tell us?
+   2. Ease reading and writing programs.
+   3. Allow us to specify properties, and guarantees within our programs. E.g., this function does not alter global state, or read from a file.
+
+   For (1) Haskell's type system lets you describe values in a fair
+   amount of detail, and mostly doesn't stuff the types with values
+   that can cause your program to explode at runtime like null.
+
+   (2) the types help you in much the same way as test driven
+   development does. It makes you think about the arguments that your
+   functions can take, and what you can compute with those
+   arguments. Also when developing it helps point out mistakes, like
+   forgetting to unwrap a Maybe value and check each of the cases.
+
+   (3) Functions are pure and always produce the same output for the
+       same input. Special actions are labeled in the type, and for
+       e.g., you can't use an IO value in a non-IO function because
+       the IO action would cause the calling function to have an IO
+       type as well. IO taints it.
+
+   This is really great, and it's super helpful. There's a saying that
+   "if a Haskell function compiles, then it's probably correct"
+   because the type system ends up preventing a lot of
+   errors. However, we can do even better!
+
+* Enter dependent types.
+  There are some things that we just can't do with even Haskell's
+  types. I can write a function to index a list
+
+  #+BEGIN_SRC haskell
+  index :: Integer -> [a] -> Maybe a
+  index 0 [] = Nothing
+  index 0 (x::xs) = Just x
+  index n (x::xs) = index (n-1) xs
+  #+END_SRC
