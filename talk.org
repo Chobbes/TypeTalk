@@ -314,7 +314,7 @@ this is going to involve a little help from types.
    integer value of some kind, and in Haskell there is no "None" or
    "null" value under the Integer type.
 
-   These "Nothing" values are enconded in so-called "Maybe" types,
+   These "Nothing" values are encoded in so-called "Maybe" types,
    i.e., types which may contain just a value of a given type, or may
    yield Nothing.
 
