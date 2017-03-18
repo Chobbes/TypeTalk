@@ -495,8 +495,227 @@ this is going to involve a little help from types.
   proposition we can think of, and then make it so our program only
   type checks if it satisfies these properties. That would be a very
   powerful tool for ensuring the correctness of our programs! Maybe we
-  can even use such a type checker to help us with our proofy math homework?
+  can even use such a type checker to help us with our proofy math
+  homework? We'll look into this idea very shortly, but first let's
+  look at some basic dependent types in Idris, a programming language
+  that is essentially Haskell with dependent types.
 
+* Dependent Types in Idris
+
+  The classic example of a dependent type is a vector. A vector is a
+  lot like a list, but the length of the list is included in the type.
+
+  So, for example, a vector of 2 strings is a different type from a
+  vector of 3 strings.
+
+  #+BEGIN_SRC idris
+    two_little_piggies : Vect 2 String
+    two_little_piggies = ["Oinkers", "Snorkins"]
+
+    -- This would be a type error, caught at compilation:
+    three_little_piggies : Vect 3 String
+    three_little_piggies = two_little_piggies
+  #+END_SRC
+
+  And one thing that's cool about this is you can actually do some
+  computations at the type level to make more complicated, generalized
+  functions.
+
+  #+BEGIN_SRC idris
+    append : Vect n elem -> Vect m elem -> Vect (n + m) elem
+  #+END_SRC
+
+  The lower case letters are "type variables" again, in this case
+  meaning ~n~ and ~m~ can be any natural numbers, and ~elem~ can be
+  any type, since Vect is defined as follows:
+
+  #+BEGIN_SRC idris
+    data Vect : Nat -> Type -> Type where
+      Nil : Vect 0 a
+      (::) : (x : a) -> Vect k a -> Vect (S k) a
+  #+END_SRC
+
+  Meaning that the type constructor ~Vect~ takes a natural number, and
+  another type, in order to make a type.
+
+  Idris has a lot of built in tools for generating your programs based
+  on their types. Since this type for append is actually pretty
+  specific, Idris is able to do a lot of the work for us.
+
+  #+BEGIN_SRC idris
+    append : Vect n elem -> Vect m elem -> Vect (n + m) elem
+    append xs ys = ?append_rhs
+  #+END_SRC
+
+  The thing on the right is known as a "hole", and this is a stand in
+  for a value which Idris will fill in for us.
+
+  Since Idris knows how types are constructed, we can have it
+  automatically perform a case split on the first argument.
+
+  #+BEGIN_SRC idris
+    append : Vect n elem -> Vect m elem -> Vect (n + m) elem
+    append [] ys = ?append_rhs_1
+    append (x :: xs) ys = ?append_rhs_2
+  #+END_SRC
+
+  Which gives us two cases, with two holes. Idris helpfully tells us
+  about these holes:
+
+  #+BEGIN_SRC idris
+    - + Main.append_rhs_1 [P]
+     `--               elem : Type
+                          m : Nat
+                         ys : Vect m elem
+         ------------------------------------------
+          Main.append_rhs_1 : Vect (plus 0 m) elem
+
+    - + Main.append_rhs_2 [P]
+     `--               elem : Type
+                          x : elem
+                          m : Nat
+                         ys : Vect m elem
+                          k : Nat
+                         xs : Vect k elem
+         ----------------------------------------------
+          Main.append_rhs_2 : Vect (plus (S k) m) elem
+  #+END_SRC
+
+  Above the dashed line you can see what variables we could have
+  access to, and what types they have. Underneath we have our hole,
+  and the type that it has.
+
+  Idris is smart, so it can automatically find values that match a
+  hole of a given type. For the first hole we know that it has type
+  ~Vect (plus 0 m) elem~, but Idris evaluates this to ~Vect m elem~,
+  and the only vector of length ~m~ that it has is ~ys~, so it just
+  happily fills this in for us, if we ask nicely!
+
+  #+BEGIN_SRC idris
+    append : Vect n elem -> Vect m elem -> Vect (n + m) elem
+    append [] ys = ys
+    append (x :: xs) ys = ?append_rhs_2
+  #+END_SRC
+
+  The second hole is a bit more interesting.
+
+  #+BEGIN_SRC idris
+    - + Main.append_rhs_2 [P]
+     `--               elem : Type
+                          x : elem
+                          m : Nat
+                         ys : Vect m elem
+                          k : Nat
+                         xs : Vect k elem
+         ----------------------------------------------
+          Main.append_rhs_2 : Vect (plus (S k) m) elem
+  #+END_SRC
+
+  We can see that ~xs~ has been given the type ~Vect k elem~, which
+  means that ~n = S k~, since ~xs~ has one element, ~x~, removed from
+  the original argument.
+
+  Our goal is to make a vector with length ~S k + m~, which we can happily ask Idris to do, and it finds:
+
+  #+BEGIN_SRC idris
+    append : Vect n elem -> Vect m elem -> Vect (n + m) elem
+    append [] ys = ys
+    append (x :: xs) ys = x :: append xs ys
+  #+END_SRC
+
+  ... Which is exactly what we want. So how did Idris do this? Well, it realized a couple of things.
+
+  #+BEGIN_SRC idris
+    data Nat : Type where
+      0 : Nat -- Zero
+      S : Nat -> Nat -- Successor (+1)
+
+
+    plus : Nat -> Nat -> Nat
+    plus 0 m = m
+    plus (S k) m = S (k `plus` m)
+
+
+    data Vect : Nat -> Type -> Type where
+      Nil : Vect 0 a
+      (::) : (x : a) -> Vect k a -> Vect (S k) a
+  #+END_SRC
+
+  First, it evaluated ~plus (S k) m~, which turns out to be ~S (k +
+  m)~. It looked at the type constructor for a vector and saw that in
+  order to get a ~Vect (S (k + m)) elem~ it would need to concatenate
+  an element with a ~Vect (k+m) elem~, which gets us here...
+
+  
+  #+BEGIN_SRC idris
+    append : Vect n elem -> Vect m elem -> Vect (n + m) elem
+    append [] ys = ys
+    append (x :: xs) ys = ?elem_to_concat :: ?rest_of_vect
+  #+END_SRC
+
+
+  #+BEGIN_SRC idris
+    - + Main.elem_to_concat [P]
+     `--                 elem : Type
+                            x : elem
+                            m : Nat
+                           ys : Vect m elem
+                            k : Nat
+                           xs : Vect k elem
+         -----------------------------------
+          Main.elem_to_concat : elem
+
+    - + Main.rest_of_vect [P]
+     `--               elem : Type
+                          x : elem
+                          m : Nat
+                         ys : Vect m elem
+                          k : Nat
+                         xs : Vect k elem
+         ------------------------------------------
+          Main.rest_of_vect : Vect (plus k m) elem
+  #+END_SRC
+
+  So, Idris knows of one element with the type ~elem~, and that's ~x~,
+  so it can fill that in.
+
+  #+BEGIN_SRC idris
+    append : Vect n elem -> Vect m elem -> Vect (n + m) elem
+    append [] ys = ys
+    append (x :: xs) ys = ?elem_to_concat :: ?rest_of_vect
+  #+END_SRC
+
+  It also knows about recursion, so it knows it has this function
+  ~append : Vect n elem -> Vect m elem -> Vect (n + m) elem~ which it
+  could call. And since it has a vector ~xs : Vect k elem~, and a
+  vector ~ys : Vect m elem~, it knows that
+
+  #+BEGIN_SRC idris
+     append xs ys : Vect (k + m) elem
+  #+END_SRC
+
+  Which is exactly the type of thing we need in this hole, so it can
+  fill it in as well.
+
+  So what you just witnessed is Idris essentially writing a program,
+  albeit a small one, for you based on a type which specified the
+  behaviour of this program. That's awesome, and super helpful!
+
+  We can even see how this would not work as well if we were just
+  using lists, which don't have the length in their type.
+
+  #+BEGIN_SRC idris
+    append : List elem -> List elem -> List elem
+    append [] ys = []
+    append (x::xs) ys = []
+  #+END_SRC
+
+  If you try to fill this in automatically, Idris will just make the
+  function return empty lists, because it's the easiest way to satisfy
+  the type. If your types are not precise enough, then a number of
+  functions will type check just fine, and Idris can't tell which one
+  of these possible functions you would want!
+  
 * Logic Primer
 
   In order to get into this we need to do a quick primer on logic and
@@ -531,6 +750,30 @@ this is going to involve a little help from types.
   you, but often they'll be more mathematical statements, such as:
 
   $$\forall n, \exists n \in \mathrm{N} \text{ such that } n > m$$
+
+  Propositions are built up from a set of axioms, which are just rules
+  describing your mathematical objects, and propositions can be
+  combined in a number of ways.
+
+  - Implications
+    + $P \rightarrow Q$, meaning "if P is true, then Q must be true."
+  - Conjunctions
+    + $P \wedge Q$, meaning "both P and Q are true."
+  - Disjunctions
+    + $P \vee Q$, meaning "at least one of P or Q is true."
+  - Negation
+    + $\neg P$, meaning "P is false."
+  - Universal quantification
+    + $\forall x, P(x)$, meaning whenever we substitute any value for ~x~ in ~P~, the proposition ~P~ holds true.
+  - Existential quantification
+    + $\exists x, P(x)$, meaning we can find an ~x~ that we can substitute into ~P~ to make the proposition hold.
+
+** Inference rules
+   There are some basic axioms for how you can work with these
+   propositions. These are just rules that "make sense". I have
+   attached the axioms for propositional logic here.
+
+   # Axiom table
 
 * Curry-Howard Isomorphism
 
