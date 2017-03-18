@@ -235,8 +235,8 @@ this is going to involve a little help from types.
    So, our trip through the land of types brings us to
    Haskell. Haskell is a programming language which treats types
    well. The syntax may be a little different than what you're used
-   to, but it's surprisingly clean, concise, and precise. It's quite a
-   mathematical language.
+   to, but it's surprisingly clean, concise, and precise. Haskell is
+   quite a mathematical language.
 
    Recall the Python programs from earlier:
 
