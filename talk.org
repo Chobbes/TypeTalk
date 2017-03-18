@@ -293,6 +293,21 @@ this is going to involve a little help from types.
    elements of the list passed into the sort function! We can compare
    them, and since they have an ordering we can sort them!
 
+   Now if you try to sort a list of unorderable things, like
+   functions, the compiler will complain.
+
+   #+BEGIN_SRC haskell
+     mySort [factorial, (*2), lambda x] -- Causes a type error, because it doesn't make sense.
+   #+END_SRC
+
+   Whereas in python it will just cause a runtime exception.
+
+   #+BEGIN_SRC python
+     # This causes an error when the program is running...
+     # We might not catch something like this until it hits production!
+     sorted([lambda x: x * 2, lambda x: x ** 2])
+   #+END_SRC
+   
    Haskell is also a bit more strict about what its types mean. For
    instance we know that these functions can't return "None" or
    "null". In the case of the factorial function it MUST return an
