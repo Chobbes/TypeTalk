@@ -439,7 +439,7 @@ this is going to involve a little help from types.
    Python. However, we can do even better!
 
 * Enter dependent types.
-  There are some things that we just can't do with even Haskell's
+  There are some things that we just can't do even with Haskell's
   types. I can write a function to index a list
 
   #+BEGIN_SRC haskell
@@ -547,7 +547,9 @@ this is going to involve a little help from types.
   produce a proof of the proposition Q.
 
   That's very similar to a function type in something like Haskell. If
-  I'm given a value of type P, then I can produce a value of type Q.
+  I'm given a value of type P, then I can produce a value of type
+  Q. So function application seems to be pretty much identical to
+  modus ponens.
 
   Similarly in logic I might have
 
@@ -563,4 +565,16 @@ this is going to involve a little help from types.
     (P, Q)
   #+END_SRC
 
-  Which means that I have a value of P, and a value of Q.
+  Which means that I have a value of P, and a value of Q. Conjunction
+  elimination is then just the projection of either the first or
+  second value in the tuple:
+
+  #+BEGIN_SRC haskell
+    -- P /\ Q -> P
+    fst :: (p, q) -> p
+    fst (a, b) = a
+
+    -- P /\ Q -> Q
+    snd :: (p, q) -> q
+    snd (a, b) = b
+  #+END_SRC
