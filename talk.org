@@ -3,14 +3,16 @@
 Hi all!
 
 My name is Calvin and I'm here to talk to you about a couple of things
--- mostly types, and the correctness of programs! I have a couple
-bullet points here, to summarize what I want to talk about:
+-- mostly types, and how they can help you write correct programs! I
+have a couple bullet points here, to summarize what I want to talk
+about:
 
-1) You should care, and that you NEED to care about your software.
+1) You should care, and you NEED to care about your software.
    Computers are undeniably integral to *every* aspect of our lives.
    Ever larger portions of our lives are controlled by computers as
-   the days go by. Whether it's a voting machine, banking software,
-   or vehicles, there's always a programmer behind it.
+   the days go by. Whether it's a voting machine, banking software, or
+   a component of a vehicle, there's always a programmer behind it
+   somewhere.
 
    This should terrify you if you have ever programmed before.
 
@@ -21,6 +23,10 @@ bullet points here, to summarize what I want to talk about:
    We need to be careful!
 
 2) Types are a good way to help you with how scary the first point is!
+
+3) Not only are types great for writing correct programs, but they can
+   make it a lot easier to write programs in the first place! They help
+   the compiler help you!
 
 This is going to be somewhat of a whirlwind introduction to the world
 of types, so if you get lost along the way that's okay. Just let me
@@ -78,13 +84,13 @@ this is going to involve a little help from types.
          if xs == []:
              return xs
          else:
-             head = xs[0]
+             first_elem = xs[0]
              rest = xs[1:]
 
-             smaller = my_sort([x for x in rest if x <= head])
-             larger = my_sort([x for x in rest if x > head])
+             smaller = my_sort([x for x in rest if x <= first_elem])
+             larger = my_sort([x for x in rest if x > first_elem])
 
-             return smaller + [head] + larger
+             return smaller + [first_elem] + larger
 
 
      def my_factorial(n):
@@ -232,20 +238,20 @@ this is going to involve a little help from types.
    to, but it's surprisingly clean, concise, and precise. It's quite a
    mathematical language.
 
-   Recall the Python programs from early:
+   Recall the Python programs from earlier:
 
    #+BEGIN_SRC python
      def my_sort(xs):
          if xs == []:
              return xs
          else:
-             head = xs[0]
+             first_elem = xs[0]
              rest = xs[1:]
 
-             smaller = my_sort([x for x in rest if x <= head])
-             larger = my_sort([x for x in rest if x > head])
+             smaller = my_sort([x for x in rest if x <= first_elem])
+             larger = my_sort([x for x in rest if x > first_elem])
 
-             return smaller + [head] + larger
+             return smaller + [first_elem] + larger
 
 
      def my_factorial(n):
@@ -260,9 +266,9 @@ this is going to involve a little help from types.
    #+BEGIN_SRC haskell
      mySort :: Ord a => [a] -> [a]
      mySort [] = []
-     mySort (head::rest) = smaller ++ [head] ++ larger
-       where smaller = mySort [x | x <- rest, x <= head]
-             larger = mySort [x | x <- rest, x > head]
+     mySort (first_elem::rest) = smaller ++ [first_elem] ++ larger
+       where smaller = mySort [x | x <- rest, x <= first_elem]
+             larger = mySort [x | x <- rest, x > first_elem]
 
 
      factorial :: Integer -> Integer
@@ -278,10 +284,10 @@ this is going to involve a little help from types.
    specification and the compiler can tell you if you deviate.
 
    In the sort function you'll see what's called a typeclass
-   constraint, "Ord", and a type variable "a". This means that "a" can
-   be any type as long as it implements the functions in "Ord", which
-   stands for "ordered" and contains things like "less than", "equal
-   to", and "greater than" comparisons.
+   constraint, "Ord", which stands for "ordered", and a type variable
+   "a". This means that "a" can be any type as long as it implements
+   the functions in "Ord", which contains things like "less than",
+   "equal to", and "greater than" comparisons.
 
    This is great, because now we know exactly what we can do with the
    elements of the list passed into the sort function! We can compare
@@ -409,9 +415,9 @@ this is going to involve a little help from types.
   #+BEGIN_SRC haskell
     mySort :: Ord a => [a] -> [a]
     mySort [] = []
-    mySort (head::rest) = smaller ++ [head] ++ larger
-      where smaller = mySort [x | x <- rest, x <= head]
-            larger = mySort [x | x <- rest, x > head]
+    mySort (first_elem::rest) = smaller ++ [first_elem] ++ larger
+      where smaller = mySort [x | x <- rest, x <= first_elem]
+            larger = mySort [x | x <- rest, x > first_elem]
   #+END_SRC
 
   It's nice that we can specify that this function only works on lists
