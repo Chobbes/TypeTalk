@@ -95,14 +95,14 @@ this is going to involve a little help from types.
    #+END_SRC
 
    Python likes to pretend that types aren't a thing, so Python
-   doesn't really tell us anything about what a function like this can
-   do. We can pass this function whatever we want as an argument, and
-   it may or may not fail -- we don't know until we run the program or
-   read it very carefully.
+   doesn't tell us anything about what a function like this can do. We
+   can pass this function whatever we want as an argument, and it may
+   or may not fail -- we don't know until we run the program or read
+   it very carefully.
 
-   Naming and documentation can help, but in practice enforcing good
-   naming and documentation is nearly impossible. It just can't be
-   done automatically.
+   Naming and documentation can help, but in practice, since it can't
+   be done automatically, enforcing good naming and documentation is
+   really damn hard.
 
    In a large code base it's difficult to even know what you should
    pass to a function. Should it take a list, or a set? Should it take
@@ -116,21 +116,21 @@ this is going to involve a little help from types.
    does. That's a lot of work!  You can run your program, perhaps with
    a suite of tests, but that can easily miss a special case.
 
-   Another concern is that this function could do a bunch of other
+   Another concern is that this function could do a bunch of secret
    stuff. It could throw away the argument, and read in an integer
    from some file -- maybe it will crash if that file doesn't exist!
    It could change the value of some global variable, causing it to
    return different values depending on the last time it was called --
-   and this might even cause other functions to behave
-   differently. This can make your program a complicated web of
-   states, which is really difficult to wrap your head around because
-   you need to understand it in its entirety -- calling any function
-   could have a drastic effect on the behavior of your program. We've
-   all been here, and it's awful! Often better to rewrite the program
-   than it is to debug it! It would be nice to keep things separated
-   into nice modular compartments that don't affect each other. That's
-   what functions are supposed to do, but very often they rely upon
-   outside state so they're not actually compartmentalized.
+   and this might cause other functions to behave differently as well!
+   This can make your program a complicated web of states, which is
+   really difficult to wrap your head around because you need to
+   understand it in its entirety -- calling any function could have a
+   drastic effect on the behavior of your program. We've all been
+   here, and it's awful! Often better to rewrite the program than it
+   is to debug it! It would be nice to keep things separated into nice
+   modular compartments that don't affect each other. That's what
+   functions are supposed to do, but very often they rely upon outside
+   state so they're not actually compartmentalized.
 
    What if we could force functions to be compartmentalized so we
    can't make these mistakes!? What if we could express what a
