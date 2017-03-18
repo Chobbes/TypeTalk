@@ -70,9 +70,11 @@ because these things may have tainted your impression of types!
   things be added together, can this function take this value as an
   argument? This seems a bit silly to some "I'll use my values however
   I like, dammit!" But it can help keep us on track, and write
-  programs that make sense! A type checker can be used to reject
-  programs which consist of nonsense like $357^{circles}$, and in fact
-  types can eliminate entire classes of errors if designed properly.
+  programs that make sense! They're excellent documentation, that the
+  compiler can ensure is accurate! A type checker can be used to
+  reject programs which consist of nonsense like $357^{circles}$, and
+  in fact types can eliminate entire classes of errors if designed
+  properly.
 
 * The types you may have seen.
 
@@ -387,8 +389,124 @@ because these things may have tainted your impression of types!
   types. I can write a function to index a list
 
   #+BEGIN_SRC haskell
-  index :: Integer -> [a] -> Maybe a
-  index 0 [] = Nothing
-  index 0 (x::xs) = Just x
-  index n (x::xs) = index (n-1) xs
+    index :: Integer -> [a] -> Maybe a
+    index 0 [] = Nothing
+    index 0 (x::xs) = Just x
+    index n (x::xs) = index (n-1) xs
   #+END_SRC
+
+  But I can't write one that the compiler can ensure is never called
+  with an index outside the range of our list.
+
+  #+BEGIN_SRC haskell
+    -- Want the integer argument to always be in range so we don't need
+    -- Maybe!
+    index :: Integer -> [a] -> a
+    index 0 [] = error "Uh... Whoops, walking off the end of the list!"
+    index 0 (x :: xs) = x
+    index n (x :: xs) = index (n-1) xs
+  #+END_SRC
+
+  We need to somehow encode the length of the list into the type so we
+  can only call index when the position provided is in range.
+
+  It's also not possible to encode other properties which depend upon
+  values in the types. For instance I can't say that a function
+  returns a list of values which are sorted in ascending order, I can
+  only say that a sort function also returns a list with values of the
+  same type...
+
+  #+BEGIN_SRC haskell
+    mySort :: Ord a => [a] -> [a]
+    mySort [] = []
+    mySort (head::rest) = smaller ++ [head] ++ larger
+      where smaller = mySort [x | x <- rest, x <= head]
+            larger = mySort [x | x <- rest, x > head]
+  #+END_SRC
+
+  It's nice that we can specify that this function only works on lists
+  which have orderable elements, but it would be even better if we
+  could also say things like...
+
+  1. The output list must have the same length as the input list.
+  2. The list in the output must contain the same elements as the input list.
+  3. The output list must be sorted in ascending order.
+
+  If we could encode these properties in the types, then if the
+  program type checks it would prove that our sort function does the
+  right thing.
+
+  In fact, that's an interesting idea, isn't it? Why don't we make it
+  so we can encode essentially any set of properties in our types, any
+  proposition we can think of, and then make it so our program only
+  type checks if it satisfies these properties. That would be a very
+  powerful tool for ensuring the correctness of our programs! Maybe we
+  can even use such a type checker to help us with our proofy math homework?
+
+* Logic Primer
+
+  In order to get into this we need to do a quick primer on logic and
+  logical proofs. In logic you have things known as propositions. A
+  proposition is just a statement, such as "the sky is blue", or "2 +
+  2 is 4". These propositions happen to be true, but we can also
+  have propositions which are false, such as "2 + 2 is 27". A
+  proposition is just something that you can propose. I might propose
+  to you the notion that "2 + 2 is 27", but using logical proofs we
+  can determine that this proposition is in fact not a true statement.
+
+  So! These propositions are often represented by variables, for
+  instance:
+
+  #+BEGIN_SRC haskell
+    P
+  #+END_SRC
+
+  ~P~ is a proposition. It could be anything, really...
+
+  #+BEGIN_SRC haskell
+    P = "ducks are fantastic"
+  #+END_SRC
+
+  And I might have another proposition:
+
+  #+BEGIN_SRC haskell
+    Q = "ducks are truly the worst"
+  #+END_SRC
+
+  Right now I'm using plain English to convey these propositions to
+  you, but often they'll be more mathematical statements, such as
+
+  $$$\forall n, \exists n \in \mathrm{N} \text{ such that } n > m$$
+
+* Curry-Howard Isomorphism
+
+  As it turns out when you start to think of your types as
+  propositions some interesting things start to pop up...
+
+  For instance if we look at something like implication in logic...
+
+  #+BEGIN_SRC haskell
+    P -> Q
+  #+END_SRC
+
+  This means that if I have a proof of the proposition P, then I can
+  produce a proof of the proposition Q.
+
+  That's very similar to a function type in something like Haskell. If
+  I'm given a value of type P, then I can produce a value of type Q.
+
+  Similarly in logic I might have
+
+  #+BEGIN_SRC haskell
+    P /\ Q
+  #+END_SRC
+
+  Which means that I have a proof of P and a proof of Q.
+
+  If you squint that's kind of similar to:
+
+  #+BEGIN_SRC haskell
+    (P, Q)
+  #+END_SRC
+
+  Which means that I have a value of P, and a value of Q.
