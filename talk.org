@@ -4,7 +4,7 @@ Hi all!
 
 My name is Calvin and I'm here to talk to you about a couple of things
 -- mostly types, and the correctness of programs! I have a couple
-bullet points here, summarizing what I'm talking about.
+bullet points here, to summarize what I want to talk about:
 
 1) That you should care, and that you NEED to care. Computers are undeniably
    integral to *every* aspect of our lives. Your bank account, car,
