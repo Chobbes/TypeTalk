@@ -6,17 +6,19 @@ My name is Calvin and I'm here to talk to you about a couple of things
 -- mostly types, and the correctness of programs! I have a couple
 bullet points here, to summarize what I want to talk about:
 
-1) That you should care, and that you NEED to care. Computers are undeniably
-   integral to *every* aspect of our lives. Your bank account, car,
-   traffic lights, and even the elevator that you might have taken
-   today all have computers in them, and they all run software. It
-   should terrify you that a loved one might have runs
-   software. Possibly very bad software.
+1) You should care, and that you NEED to care about your software.
+   Computers are undeniably integral to *every* aspect of our lives.
+   Ever larger portions of our lives are controlled by computers as
+   the days go by. Whether it's a voting machine, banking software,
+   or vehicles, there's always a programmer behind it.
 
-   All of these devices have programs on them that need to work
-   correctly. Sometimes it's annoying if they don't work correctly,
-   which can cause a business to lose customers... And in many cases
-   correctness is life or death.
+   This should terrify you if you have ever programmed before.
+
+   An incorrect program may just be annoying and lose a business a
+   customer, or an incorrect program could kill somebody if for
+   instance it's the software running a pacemaker.
+
+   We need to be careful!
 
 2) Types are a good way to help you with how scary the first point is!
 
@@ -32,31 +34,17 @@ You think that this is a normal, and necessary thing:
 
 # picture of various runtime exceptions.
 
-That's bad. Runtime exceptions don't actually /have/ to exist.
-
-* What are types?
-
-Most have you have probably encountered some form of type
-system. Types tell you which values anything in your program can take
-on. This also tells you what operations are permitted on a value of a
-certain type.
-
-Types can be excellent documentation, telling you pretty much exactly
-what a function can do. Types can also catch a lot of errors and
-mistakes. After all, now that the compiler knows how you intend to use
-a variable, it can tell you when you're using it in a strange way by
-mistake!
-
-In fact a well designed type system can make it so that you don't have
-runtime exceptions, because all operations on the values that you have
-are well defined.
-
-* The types you may have seen
-
-So, I want to quickly address some of what you may have seen before
-because these things may have tainted your impression of types!
+That's bad. Runtime exceptions don't actually /have/ to exist, and it
+can be very bad if our pacemaker segfaults. So maybe we should avoid
+these problems in the first place! I'll talk a little about what we
+can do to avoid these problems. Later on in the talk we'll dip a
+little into how you can guarantee that the logic in your program is
+correct too, and not just that it does not explode at runtime. All of
+this is going to involve a little help from types.
 
 * What is a type?
+
+  A type describes what a value "is".
 
   You've probably heard of types in programming languages, and
   probably even used them. Most of the time you see them in the
@@ -65,15 +53,18 @@ because these things may have tainted your impression of types!
 
   Over the years in computing science and mathematics we've learned
   that types are good for a lot more than just figuring out how to lay
-  out bits in memory. They tell us how you can use values -- can these
-  things be added together, can this function take this value as an
-  argument? This seems a bit silly to some "I'll use my values however
-  I like, dammit!" But it can help keep us on track, and write
-  programs that make sense! They're excellent documentation, that the
-  compiler can ensure is accurate! A type checker can be used to
-  reject programs which consist of nonsense like $357^{circles}$, and
-  in fact types can eliminate entire classes of errors if designed
-  properly.
+  out bits in memory.
+
+  Types tell us how you can use values -- what operations are defined
+  on the type? Can you add things of that type? Can a function take a
+  value of a certain type as an argument?
+
+  This can really help us write programs that make sense! And these
+  types are excellent documentation which the compiler can ensure is
+  accurate! A type checker can be used to reject programs which
+  consist of nonsense like $357^{circles}$, and in fact types can
+  eliminate entire classes of errors if designed properly. No more
+  null reference exceptions!
 
 * The types you may have seen.
 
