@@ -474,9 +474,9 @@ because these things may have tainted your impression of types!
   #+END_SRC
 
   Right now I'm using plain English to convey these propositions to
-  you, but often they'll be more mathematical statements, such as
+  you, but often they'll be more mathematical statements, such as:
 
-  $$$\forall n, \exists n \in \mathrm{N} \text{ such that } n > m$$
+  $$\forall n, \exists n \in \mathrm{N} \text{ such that } n > m$$
 
 * Curry-Howard Isomorphism
 
