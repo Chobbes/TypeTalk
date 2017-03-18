@@ -714,8 +714,47 @@ this is going to involve a little help from types.
   function return empty lists, because it's the easiest way to satisfy
   the type. If your types are not precise enough, then a number of
   functions will type check just fine, and Idris can't tell which one
-  of these possible functions you would want!
-  
+  of these possible functions you would want, it just gives you the
+  first one it can find.
+
+** Dependent types and indexing
+
+   We can actually guarantee that a function indexing a vector stays
+   within the bounds of the vector at compile time, too!
+
+   #+BEGIN_SRC idris
+     index : Fin len -> Vect len elem -> elem
+     index FZ (x :: xs) = x
+     index (FS n) (_ :: xs) = myIndex n xs 
+   #+END_SRC
+
+   ~Fin len~ is a type which represents natural numbers strictly less
+   than ~len~. So, given a vector of length ~len~, if we provide a
+   natural number greater than or equal to ~len~ as the index, then it
+   would not be an element of the ~Fix len~ type, so the program would
+   not type check, catching any potential bugs where you might walk
+   off the end of an array at compile time.
+
+   #+BEGIN_SRC idris
+     cats : Vect 2 String
+     cats = ["The Panther", "Smoke Smoke"]
+
+     -- "The Panther" : String
+     index 0 cats -- This type checks.
+
+
+     -- (input):1:9:When checking argument prf to function Data.Fin.fromInteger:
+     --         When using 2 as a literal for a Fin 2 
+     --                 2 is not strictly less than 2
+     index 2 cats -- This is out of bounds, so the program won't even compile!
+   #+END_SRC
+
+   There are lots of cool guarantees we can make with dependent types!
+   As alluded to earlier, we can even use them to make specifications
+   for how our program behaves as arbitrary propositions, and then use
+   the type checker to ensure that our program actually behaves and
+   follows these specifications.
+
 * Logic Primer
 
   In order to get into this we need to do a quick primer on logic and
