@@ -3,23 +3,22 @@
 Hi all!
 
 My name is Calvin and I'm here to talk to you about a couple of things
--- mostly types, and the correctness of programs! My job right now is
-to convince you of two things.
+-- mostly types, and the correctness of programs! I have a couple
+bullet points here, summarizing what I'm talking about.
 
-1) That you should care, and that you NEED to care. Computers are undeniably an
-   integral part of *every* aspect of our lives. Your bank account,
-   car, traffic lights, any airplane you get on, and even the elevator
-   that you might have taken today, or the pacemaker you or a loved
-   one may have. They all have computers in them, and they all run
-   software.
+1) That you should care, and that you NEED to care. Computers are undeniably
+   integral to *every* aspect of our lives. Your bank account, car,
+   traffic lights, and even the elevator that you might have taken
+   today all have computers in them, and they all run software. It
+   should terrify you that a loved one might have runs
+   software. Possibly very bad software.
 
-   All of these devices and the programs on them need to be working
-   correctly. They need to work correctly not just because it's
-   annoying otherwise, but because it really is life or death in many
-   cases.
+   All of these devices have programs on them that need to work
+   correctly. Sometimes it's annoying if they don't work correctly,
+   which can cause a business to lose customers... And in many cases
+   correctness is life or death.
 
-2) and the second thing that I want to convince you of is that types
-   are a good way to help you write correct programs.
+2) Types are a good way to help you with how scary the first point is!
 
 This is going to be somewhat of a whirlwind introduction to the world
 of types, so if you get lost along the way that's okay. Just let me
