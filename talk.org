@@ -346,13 +346,55 @@ this is going to involve a little help from types.
    In this case you know that "getIndex" can return something like a
    "null" value called "Nothing", but it could also return "Just" an
    Integer. You have to explicitly unwrap these values, like in the
-   case statement, to get at the possible value.
+   case statement, to get at the possible value. This might seem
+   tedious, but if you're a fancy Haskell person you might use "do"
+   notation, which does this automatically.
 
-   This example also shows how input and output which are encoded in the
+   #+BEGIN_SRC haskell
+     -- Look up a word in the same position in a different dictionary.
+     dictionary :: [String]
+     dictionary = ["cats", "sandwiches", "hot chocolate"]
+
+
+     synonyms :: [String]
+     synonyms = ["meows", "bread oreos", "sweet nectar"]
+
+
+     getIndex :: Integer -> [a] -> Maybe a
+     getIndex _ [] = Nothing
+     getIndex 0 (x:xs) = Just x
+     getIndex n (_:xs) = getIndex (n-1) xs
+
+
+     lookupSynonym :: String -> Maybe String
+     lookupSynonym word = do index <- getIndex word dictionary
+                             getIndex index synonyms
+
+     -- Lookup synonyms essentially desugars to this.
+     -- The compiler can help avoid this tedium!
+     painfulLookupSynonyms :: String -> Maybe String
+     painfulLookupSynonyms word = case getIndex word dictionary of
+                                       Nothing -> Nothing
+                                       (Just index) -> case getIndex index synonyms of 
+                                                            Nothing -> Nothing
+                                                            (Just synonym) -> (Just synonym)
+
+     main :: IO ()
+     main = do word <- getLine
+               case lookupSynonym word of
+                 Nothing -> putStrLn ("Hmmm, I don't know a synonym for " ++ word)
+                 (Just synonym) -> putStrLn ("I think " ++ word ++ "'s are a lot like " ++ synonym ++ "'s!")
+   #+END_SRC
+
+   Types never really add any extra tedium, and they can often relieve
+   it because the compiler can automatically do stuff for you.
+   
+   These examples also shows how input and output are encoded in the
    types. For example:
 
    #+BEGIN_SRC haskell
      -- putStr :: IO ()
+     -- putStrLn :: IO ()
      -- getLine :: IO String
 
      main :: IO ()
@@ -361,18 +403,18 @@ this is going to involve a little help from types.
                putStrLn ("Hello, " ++ name)
    #+END_SRC
 
-   The ()'s essentially mean "void" or "no return value". Also the
-   dashes are comments. An "IO String" for example is a function which
-   gets a string value using IO. A function which computes its return
-   value based on an IO action will be forced to have an IO type as
-   well, so you can't hide IO actions in functions which supposedly
-   don't rely upon IO.
+   The ()'s essentially mean "void" or "no return value," we're just
+   printing stuff here. An "IO String", like getLine, is something
+   which gets a string value using IO. A function which computes its
+   return value based on an IO action will be forced to have an IO
+   type as well, so you can't hide IO actions in functions which
+   supposedly don't rely upon IO.
 
    It seems that Haskell satisfies most of our goals.
 
-   1. Catch errors at compile time. If something is "wrong", why wait for the program to run to tell us?
-   2. Ease reading and writing programs.
-   3. Allow us to specify properties, and guarantees within our programs. E.g., this function does not alter global state, or read from a file.
+   1. We can catch errors at compile time. If something is "wrong", why wait for the program to run to tell us?
+   2. It eases reading and writing programs. It's nice to know what a function can do based on a small type.
+   3. It allow us to specify properties, and guarantees within our programs. E.g., this function does not alter global state, or read from a file.
 
    For (1) Haskell's type system lets you describe values in a fair
    amount of detail, and mostly doesn't stuff the types with values
@@ -384,16 +426,17 @@ this is going to involve a little help from types.
    arguments. Also when developing it helps point out mistakes, like
    forgetting to unwrap a Maybe value and check each of the cases.
 
-   (3) Functions are pure and always produce the same output for the
-       same input. Special actions are labeled in the type, and for
-       e.g., you can't use an IO value in a non-IO function because
-       the IO action would cause the calling function to have an IO
-       type as well. IO taints it.
+   (3) Functions are "pure", meaning they always produce the same output
+       for the same input. Special actions are labeled in the type,
+       and for e.g., you can't use an IO value in a non-IO function
+       because the IO action would cause the calling function to have
+       an IO type as well. IO taints it.
 
    This is really great, and it's super helpful. There's a saying that
    "if a Haskell function compiles, then it's probably correct"
-   because the type system ends up preventing a lot of
-   errors. However, we can do even better!
+   because the type system ends up preventing a lot of errors. For
+   instance, you never end up trying to index ~None~ like you would in
+   Python. However, we can do even better!
 
 * Enter dependent types.
   There are some things that we just can't do with even Haskell's
