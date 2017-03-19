@@ -404,8 +404,12 @@ this is going to involve a little help from types.
 
      lookupSynonyms :: String -> Maybe (String, String)
      lookupSynonyms word = do index <- getIndex word dictionary
+
+                              -- Lookup my synonyms, if anything fails return Nothing.
                               firstSynonym <- getIndex index synonyms
                               secondSynonym <- getIndex index moreSynonyms
+                         
+                              -- Success! Return Just the synonyms.
                               Just (firstSynonym, secondSynonym)
 
      -- lookupSynonyms essentially desugars to this.
