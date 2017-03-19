@@ -206,7 +206,7 @@ this is going to involve a little help from types.
    computation could have no solution, or fail for some reason, but we
    need the compiler to ensure that we check for these cases. We are
    notoriously bad at checking for null references, and it's
-   particularly difficult and verbose when every variable can be null.
+   particularly difficult and verbose when every variable can be ~null~.
 
    Which leads us to the issue that a lot of people don't like
    declaring types for all of their variables, thinking that this is a
