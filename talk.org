@@ -1,5 +1,6 @@
 * Introduction
-
+# Maybe some of the motivation for this talk should be... "How can your language help you?"
+# Why learn something new? Why hope for something better?
 Hi all!
 
 My name is Calvin and I'm here to talk to you about a couple of things
