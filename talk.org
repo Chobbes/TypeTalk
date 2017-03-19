@@ -309,13 +309,29 @@ this is going to involve a little help from types.
      mySort [factorial, (*2), lambda x] -- Causes a type error, because it doesn't make sense.
    #+END_SRC
 
-   Whereas in python it will just cause a runtime exception.
+   Whereas in python it will just cause a runtime exception, which we
+   might not know about until it's too late!
 
    #+BEGIN_SRC python
      # This causes an error when the program is running...
      # We might not catch something like this until it hits production!
      sorted([lambda x: x * 2, lambda x: x ** 2])
    #+END_SRC
+
+   Additionally, we do need the ~Ord~ constraint in Haskell. Otherwise we have something like this:
+
+   #+BEGIN_SRC haskell
+     -- Instead of: Ord a => [a] -> [a]
+     mySort :: [a] -> [a]
+     mySort [] = []
+     mySort (first_elem::rest) = smaller ++ [first_elem] ++ larger
+       where smaller = mySort [x | x <- rest, x <= first_elem]
+             larger = mySort [x | x <- rest, x > first_elem]
+   #+END_SRC
+
+   Which causes a type error, since ~a~ could be *any type* without
+   this constraint, which also includes unorderable types like
+   functions, or pictures.
    
    Haskell is also a bit more strict about what its types mean. For
    instance we know that these functions can't return "None" or
