@@ -331,7 +331,9 @@ this is going to involve a little help from types.
 
    Which causes a type error, since ~a~ could be *any type* without
    this constraint, which also includes unorderable types like
-   functions, or pictures.
+   functions, or pictures. If the compiler lets you call mySort on a
+   list of something, then that list can actually be sorted, and
+   you're guaranteed that things will just work!
    
    Haskell is also a bit more strict about what its types mean. For
    instance we know that these functions can't return "None" or
