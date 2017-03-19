@@ -283,15 +283,19 @@ this is going to involve a little help from types.
    cases. You hardly have to write any type signatures at all, but
    it's useful to write the top level signatures that you see here as
    it helps guide you when writing the function -- it acts as a little
-   specification and the compiler can tell you if you deviate. In
-   Haskell even these can be avoided, and the compiler can still infer
-   what the types of variables should be in most cases. After all if
-   you write 3, then it's probably a number. If you multiply a
-   variable by another floating point number, then that variable has
-   to be a float too, so the compiler could figure this out for
-   us. This lets us be as explicit with our types as we want, but the
-   compiler can still catch issues even if you don't tell it the type
-   of something.
+   specification and the compiler can tell you if you deviate from
+   it. In Haskell even these can be avoided, and the compiler can
+   still infer what the types of variables should be in most
+   cases. After all if you write 3, then it's probably a number. If
+   you multiply a variable by another floating point number, then that
+   variable has to be a float too, so the compiler could figure this
+   out for us. This lets us be as explicit with our types as we want,
+   but the compiler can still catch issues even if you don't tell it
+   the type of something. You'll probably find that writing type
+   signatures for functions in Haskell really helps you figure out how
+   to write the function. It's kind of like test driven development in
+   a way, it gives you an idea of how you would use the function right
+   away, which makes it easier to write the logic later.
 
    In the sort function you'll see what's called a typeclass
    constraint, "Ord", which stands for "ordered", and a type variable
