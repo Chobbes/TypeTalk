@@ -872,21 +872,22 @@ this is going to involve a little help from types.
 
   That's very similar to a function type in something like Haskell. If
   I'm given a value of type P, then I can produce a value of type
-  Q. So function application seems to be pretty much identical to
-  modus ponens.
+  Q. So function application seems to be identical to modus ponens.
+
+  #+BEGIN_SRC haskell
+    p -> q
+  #+END_SRC
 
   Similarly in logic I might have
 
-  #+BEGIN_SRC haskell
-    P /\ Q
-  #+END_SRC
+  \[P \wedge Q\]
 
   Which means that I have a proof of P and a proof of Q.
 
   If you squint that's kind of similar to:
 
   #+BEGIN_SRC haskell
-    (P, Q)
+    (p, q)
   #+END_SRC
 
   Which means that I have a value of P, and a value of Q. Conjunction
@@ -902,3 +903,31 @@ this is going to involve a little help from types.
     snd :: (p, q) -> q
     snd (a, b) = b
   #+END_SRC
+
+  What are the values of a type then? Well, they look a lot like an
+  existence proof of a given proposition. For instance:
+
+  #+BEGIN_SRC haskell
+    const :: p -> q -> p
+    const a b = a
+  #+END_SRC
+
+  The value, in this case the function which returns the first
+  element, can be seen as a proof of the proposition $p \rightarrow q
+  \rightarrow p$. You take the proof of the first proposition in the
+  chain of implications, and return it as a proof of the same
+  proposition at the end of the implication chain. Which makes sense
+  to me!
+
+  We can also see how the type checker can prevent us from proving
+  false propositions. For instance, you can't prove $p \rightarrow q$,
+  because there would be no way to get a proof of $q$ from a proof of
+  another proposition $p$, when both $q$ and $p$ could be any random
+  proposition!
+  
+  #+BEGIN_SRC haskell
+    bogus : p -> q
+    bogus p = -- What can I put here that would type check? :(
+  #+END_SRC
+
+  We can't find a value of type ~q~, since we only have a value of type ~p~!
