@@ -502,7 +502,9 @@ this is going to involve a little help from types.
   #+END_SRC
 
   We need to somehow encode the length of the list into the type so we
-  can only call index when the position provided is in range.
+  can only call index when the position provided is in range. We can't
+  do this in Haskell because it doesn't let us have types which depend
+  upon values (e.g., the length of a list).
 
   It's also not possible to encode other properties which depend upon
   values in the types. For instance I can't say that a function
@@ -565,7 +567,7 @@ this is going to involve a little help from types.
     append : Vect n elem -> Vect m elem -> Vect (n + m) elem
   #+END_SRC
 
-  The lower case letters are "type variables" again, in this case
+  The lower case letters are "variables" again, in this case
   meaning ~n~ and ~m~ can be any natural numbers, and ~elem~ can be
   any type, since Vect is defined as follows:
 
@@ -587,8 +589,8 @@ this is going to involve a little help from types.
     append xs ys = ?append_rhs
   #+END_SRC
 
-  The thing on the right is known as a "hole", and this is a stand in
-  for a value which Idris will fill in for us.
+  The thing on the right hand side is known as a "hole", and this is a
+  stand in for a value which Idris will fill in for us.
 
   Since Idris knows how types are constructed, we can have it
   automatically perform a case split on the first argument.
@@ -652,10 +654,11 @@ this is going to involve a little help from types.
   #+END_SRC
 
   We can see that ~xs~ has been given the type ~Vect k elem~, which
-  means that ~n = S k~, since ~xs~ has one element, ~x~, removed from
-  the original argument.
+  means that ~n = S k~, since ~xs~ is a part of the ~Vect n elem~
+  argument, just with one less element since ~x~ is split from it.
 
-  Our goal is to make a vector with length ~S k + m~, which we can happily ask Idris to do, and it finds:
+  Our goal is to make a vector with length ~S k + m~, which we can
+  happily ask Idris to do, and it finds:
 
   #+BEGIN_SRC idris
     append : Vect n elem -> Vect m elem -> Vect (n + m) elem
@@ -663,7 +666,8 @@ this is going to involve a little help from types.
     append (x :: xs) ys = x :: append xs ys
   #+END_SRC
 
-  ... Which is exactly what we want. So how did Idris do this? Well, it realized a couple of things.
+  ... Which is exactly what we want. So how did Idris do this? Well,
+  it realized a couple of things.
 
   #+BEGIN_SRC idris
     data Nat : Type where
@@ -747,7 +751,7 @@ this is going to involve a little help from types.
   #+BEGIN_SRC idris
     append : List elem -> List elem -> List elem
     append [] ys = []
-    append (x::xs) ys = []
+    append (x :: xs) ys = []
   #+END_SRC
 
   If you try to fill this in automatically, Idris will just make the
@@ -791,8 +795,8 @@ this is going to involve a little help from types.
 
    There are lots of cool guarantees we can make with dependent types!
    As alluded to earlier, we can even use them to make specifications
-   for how our program behaves as arbitrary propositions, and then use
-   the type checker to ensure that our program actually behaves and
+   for how our program should behave with arbitrary propositions, and
+   then use the type checker to ensure that our program actually
    follows these specifications.
 
 * Logic Primer
