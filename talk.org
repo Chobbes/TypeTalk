@@ -17,8 +17,8 @@ about:
    This should terrify you if you have ever programmed before.
 
    An incorrect program may just be annoying and lose a business a
-   customer, or an incorrect program could kill somebody if for
-   instance it's the software running a pacemaker.
+   customer, or an incorrect program could kill somebody if it's
+   something vital, like software running a pacemaker.
 
    We need to be careful!
 
@@ -188,21 +188,21 @@ this is going to involve a little help from types.
    it's better to explicitly convert the values -- you don't actually
    want to do conversions that often, and when you do it's better to
    know when it's happening, otherwise you might end up with
-   unexpected behavior.
+   unexpected behavior which is really difficult to debug.
 
    Even this Java example has problems. For instance Java is a
    language with null references. A variable of any type in Java (save
-   for some primitive types) can have the value `null` assigned to
-   it. You've probably seen `null` in languages before, even Python
-   sort of has this with `None`. The problem with `null` inhabiting
+   for some primitive types) can have the value ~null~ assigned to
+   it. You've probably seen ~null~ in languages before, even Python
+   sort of has this with ~None~. The problem with ~null~ inhabiting
    every type is that it behaves very poorly with almost every
-   operation. Comparing `null` to 0 could lead to a runtime
-   exception. Subtracting 1 from `null` would lead to a runtime
+   operation. Comparing ~null~ to 0 could lead to a runtime
+   exception. Subtracting 1 from ~null~ would lead to a runtime
    exception. We don't want runtime exceptions, since we might not
    catch them until our application is running in production! It would
    be great if the compiler could tell us when we're doing something
    that doesn't make sense like comparing a null value to an
-   integer. Sometimes it makes sense to have `None` values, since a
+   integer. Sometimes it makes sense to have ~None~ values, since a
    computation could have no solution, or fail for some reason, but we
    need the compiler to ensure that we check for these cases. We are
    notoriously bad at checking for null references, and it's
