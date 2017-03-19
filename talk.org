@@ -361,7 +361,7 @@ this is going to involve a little help from types.
      getIndexAcc pos value (x::xs) = if x == value
                                         then Just pos
                                         else getIndexAcc (pos+1) xs
-            
+
 
      -- A dictionary of all the important words.
      dictionary :: [String]
@@ -392,24 +392,32 @@ this is going to involve a little help from types.
      synonyms = ["meows", "bread oreos", "sweet nectar"]
 
 
+     moreSynonyms :: [String]
+     moreSynonyms = ["floofs", "subs", "hot coco"]
+
+
      getIndex :: Integer -> [a] -> Maybe a
      getIndex _ [] = Nothing
      getIndex 0 (x:xs) = Just x
      getIndex n (_:xs) = getIndex (n-1) xs
 
 
-     lookupSynonym :: String -> Maybe String
-     lookupSynonym word = do index <- getIndex word dictionary
-                             getIndex index synonyms
+     lookupSynonyms :: String -> Maybe (String, String)
+     lookupSynonyms word = do index <- getIndex word dictionary
+                              firstSynonym <- getIndex index synonyms
+                              secondSynonym <- getIndex index moreSynonyms
+                              Just (firstSynonym, secondSynonym)
 
-     -- Lookup synonyms essentially desugars to this.
+     -- lookupSynonyms essentially desugars to this.
      -- The compiler can help avoid this tedium!
-     painfulLookupSynonyms :: String -> Maybe String
+     painfulLookupSynonyms :: String -> Maybe (String, String)
      painfulLookupSynonyms word = case getIndex word dictionary of
                                        Nothing -> Nothing
                                        (Just index) -> case getIndex index synonyms of 
                                                             Nothing -> Nothing
-                                                            (Just synonym) -> (Just synonym)
+                                                            (Just first) -> case getIndex index moreSynonyms of
+                                                                                         Nothing -> Nothing
+                                                                                         (Just second) -> Just (first, second)
 
      main :: IO ()
      main = do word <- getLine
