@@ -865,9 +865,7 @@ this is going to involve a little help from types.
 
   For instance if we look at something like implication in logic...
 
-  #+BEGIN_SRC haskell
-    P -> Q
-  #+END_SRC
+  \[P \rightarrow Q\]
 
   This means that if I have a proof of the proposition P, then I can
   produce a proof of the proposition Q.
