@@ -286,9 +286,10 @@ this is going to involve a little help from types.
    what the types of variables should be in most cases. After all if
    you write 3, then it's probably a number. If you multiply a
    variable by another floating point number, then that variable has
-   to be a float too. This lets us be as explicit with our types as we
-   want, but the compiler can still catch issues even if you don't
-   tell it the type of something.
+   to be a float too, so the compiler could figure this out for
+   us. This lets us be as explicit with our types as we want, but the
+   compiler can still catch issues even if you don't tell it the type
+   of something.
 
    In the sort function you'll see what's called a typeclass
    constraint, "Ord", which stands for "ordered", and a type variable
