@@ -284,7 +284,7 @@ this is going to involve a little help from types.
    specification and the compiler can tell you if you deviate. In
    Haskell even these can be avoided, and the compiler can still infer
    what the types of variables should be in most cases. After all if
-   you write 3, then it's probably a number. If you multiple a
+   you write 3, then it's probably a number. If you multiply a
    variable by another floating point number, then that variable has
    to be a float too. This lets us be as explicit with our types as we
    want, but the compiler can still catch issues even if you don't
