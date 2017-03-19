@@ -433,7 +433,7 @@ this is going to involve a little help from types.
    Types never really add any extra tedium, and they can often relieve
    it because the compiler can automatically do stuff for you.
    
-   These examples also shows how input and output are encoded in the
+   These examples also show how input and output are encoded in the
    types. For example:
 
    #+BEGIN_SRC haskell
@@ -447,7 +447,7 @@ this is going to involve a little help from types.
                putStrLn ("Hello, " ++ name)
    #+END_SRC
 
-   The ()'s essentially mean "void" or "no return value," we're just
+   The ~()~'s essentially mean "void" or "no return value," we're just
    printing stuff here. An "IO String", like getLine, is something
    which gets a string value using IO. A function which computes its
    return value based on an IO action will be forced to have an IO
@@ -457,30 +457,26 @@ this is going to involve a little help from types.
    It seems that Haskell satisfies most of our goals.
 
    1. We can catch errors at compile time. If something is "wrong", why wait for the program to run to tell us?
+      + The type system lets us describe values in a fair amount of detail.
+      + Types don't contain values like ~null~ which cause explosions at runtime.
    2. It eases reading and writing programs. It's nice to know what a function can do based on a small type.
+      + Types help in much the same way as test driven development.
+        * Makes you think about the arguments you function takes, and what it returns.
+      + Thinking about what you can actually compute with restricted types is helpful.
+        * Keeps focus.
+        * Helps you know what a function can possibly do.
+      + Types point out errors when developing, such as forgetting to unwrap a Maybe value and check each of the cases.
    3. It allow us to specify properties, and guarantees within our programs. E.g., this function does not alter global state, or read from a file.
-
-   For (1) Haskell's type system lets you describe values in a fair
-   amount of detail, and mostly doesn't stuff the types with values
-   that can cause your program to explode at runtime like null.
-
-   (2) the types help you in much the same way as test driven
-   development does. It makes you think about the arguments that your
-   functions can take, and what you can compute with those
-   arguments. Also when developing it helps point out mistakes, like
-   forgetting to unwrap a Maybe value and check each of the cases.
-
-   (3) Functions are "pure", meaning they always produce the same output
-       for the same input. Special actions are labeled in the type,
-       and for e.g., you can't use an IO value in a non-IO function
-       because the IO action would cause the calling function to have
-       an IO type as well. IO taints it.
+      + Functions are "pure", meaning they always produce the same output for the same input.
+      + Special actions, like IO, are labeled in the type. So you can't use an IO value in a non-IO function.
+        * The IO action would cause the calling function to have an IO type. IO taints values.
 
    This is really great, and it's super helpful. There's a saying that
    "if a Haskell function compiles, then it's probably correct"
    because the type system ends up preventing a lot of errors. For
    instance, you never end up trying to index ~None~ like you would in
-   Python. However, we can do even better!
+   Python. Think how much time you would save if you never ran into
+   that problem! However, we can do even better!
 
 * Enter dependent types.
   There are some things that we just can't do even with Haskell's
