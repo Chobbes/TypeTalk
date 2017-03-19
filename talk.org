@@ -230,6 +230,7 @@ this is going to involve a little help from types.
   - Catch errors at compile time. If something is "wrong", why wait for the program to run to tell us?
   - Ease reading and writing programs.
   - Allow us to specify properties, and guarantees within our programs. E.g., this function does not alter global state, or read from a file.
+  - Less verbosity when writing types. Should be easy and clean!
 
 ** Haskell
 
