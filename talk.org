@@ -931,3 +931,117 @@ this is going to involve a little help from types.
   #+END_SRC
 
   We can't find a value of type ~q~, since we only have a value of type ~p~!
+
+* Proofs in practice
+
+  I'm going to quickly show you some basic proofs in Idris. With any
+  luck you can at least imagine how these proofs might be extended to
+  more complex programs!
+
+  Idris has a type which represents equality between two things. This
+  type is constructed, as you might expect, with the equals sign.
+
+  #+BEGIN_SRC idris
+    equality_good : 2+3 = 5
+    equality_good = Refl
+
+    -- This fails to type check
+    equality_bad : 2+3 = 7
+    equality_bad = Refl
+  #+END_SRC
+
+  An equality like this has only one constructor, ~Refl~. This
+  equality type is roughly defined as:
+
+  #+BEGIN_SRC idris
+    data (=) : a -> b -> Type where
+      Refl : x = x
+  #+END_SRC
+
+  Which looks a little obtuse, but really all this means is that if we
+  want to put ~Refl~ in a hole with some equality type, then Idris
+  needs to be able to determine that whatever is on the left and right
+  of the equals signs will evaluate to the exact same value. If Idris
+  can determine that, then the left and the right side are considered
+  to be identical, and we can replace whatever is on the left side
+  with whatever is on the right side and vice versa. This is
+  reflexivity, and it's what ~Refl~ stands for.
+
+  Now, with this in mind lets walk through a small, but mind bending
+  example:
+
+  #+BEGIN_SRC idris
+    cong : (f : a -> b) -> x = y -> f x = f y
+    cong f prf = ?cong_rhs
+  #+END_SRC
+
+  ~cong~ stands for congruence, and has a type which represents the
+  proposition that, if you are given a function ~f~, and you know that
+  some ~x~ and ~y~ are equal, then ~f x = f y~.
+
+  This might seem really odd and scary right now, because you have
+  equals signs in your types. But remember, types are propositions of
+  theorems, and these equals signs just means that we should be able
+  to use the ~Refl~ constructor to show that both things are equal
+  somehow.
+
+  Here's what we see when we ask Idris about our goal, ~cong_rhs~:
+
+  #+BEGIN_SRC idris
+     - + Main.cong_rhs [P]
+    `--              b : Type
+                     a : Type
+                     x : a
+                     f : a -> b
+                     y : a
+                   prf : x = y
+        ---------------------------
+         Main.cong_rhs : f x = f y
+  #+END_SRC
+
+  So, it looks like we need to be able to show that ~f x = f y~. In
+  the list of known values it seems that we have a proof of ~x=y~ as
+  one of the arguments. Since we have a proof that ~x=y~, we should be
+  able to rewrite ~y~ to be ~x~ using reflexivity. In Idris this is
+  done by deconstructing the proof of ~x=y~ by pattern matching on the
+  argument.
+
+  #+BEGIN_SRC idris
+    cong : (f : a -> b) -> x = y -> f x = f y
+    cong f Refl = ?cong_rhs_1
+  #+END_SRC
+
+  That looks really unimpressive, but let's see what it did to our goal:
+
+  #+BEGIN_SRC idris
+    - + Main.cong_rhs_1 [P]
+     `--                b : Type
+                        a : Type
+                        x : a
+                        f : a -> b
+         -----------------------------
+          Main.cong_rhs_1 : f x = f x
+  #+END_SRC
+
+  Perfect! It replaced ~y~ with ~x~ everywhere. Now we just need
+  something with the type ~f x = f x~, which is trivial, since if you
+  look at the definition of ~Refl~, that's pretty much exactly what it
+  does.
+
+  If we give Refl the arguments ~f x~, it should produce a type ~f x =
+  f x~. In Idris ~Refl~ uses implicit arguments, since it can often
+  infer what it should use in context, so we could just write:
+
+  #+BEGIN_SRC idris
+    cong : (f : a -> b) -> x = y -> f x = f y
+    cong f Refl = Refl
+  #+END_SRC
+
+  But we could also give it an argument explicitly.
+
+  #+BEGIN_SRC idris
+    cong : (f : a -> b) -> x = y -> f x = f y
+    cong f (Refl {x}) = Refl {x = f x}
+  #+END_SRC
+  
+* Tactics
