@@ -1206,5 +1206,47 @@ this is going to involve a little help from types.
      plus_assoc (S k) y z = cong S (plus_assoc k y z)
    #+END_SRC
 
-   Which completes our proof!
+   Which completes our proof! It's interesting how applying a theorem,
+   like ~cong~, is literally just applying a function.
+
+   It's also neat how recursion and induction are really just the same
+   thing, and you can see that pretty clearly when working with
+   something like Idris.
+
 * Tactics
+
+  Sometimes building up proof terms in this functional style is a bit
+  tedious. Once you get more complicated proofs on the go it gets
+  pretty hard to keep track of all of the types. There are other
+  languages which use a different style of proof based on tactics,
+  which are little commands that build up these proof terms behind the
+  scenes for you.
+
+  These languages are interesting to work with, but the proofs are
+  actually pretty hard to read without the proof state shown, which
+  editors for these languages will display nicely. The proof state is
+  just your current goal type, and it displays it in much the same
+  fashion as Idris displays its goals.
+
+  #+BEGIN_SRC coq
+    Inductive nat : Type :=
+      | O : nat
+      | S : nat -> nat.
+
+
+    Fixpoint plus (n m : nat) : nat :=
+      match n with
+        | O => m
+        | S n' => S (plus n' m)
+      end.
+
+
+    Theorem plus_assoc : forall (x y z : nat), plus x (plus y z) = plus (plus x y) z.
+    Proof.
+      intros x y z. induction x as [| k].
+      - reflexivity.
+      - simpl. (* Simplify with evaluation *)
+        rewrite IHk. (* Use induction hypothesis to rewrite terms *)
+        reflexivity.
+    Qed.
+  #+END_SRC
