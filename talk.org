@@ -983,7 +983,7 @@ this is going to involve a little help from types.
   equals signs in your types. But remember, types are propositions of
   theorems, and these equals signs just means that we should be able
   to use the ~Refl~ constructor to show that both things are equal
-  somehow.
+  using Idris's internal notion of the equality of terms.
 
   Here's what we see when we ask Idris about our goal, ~cong_rhs~:
 
@@ -1000,11 +1000,11 @@ this is going to involve a little help from types.
   #+END_SRC
 
   So, it looks like we need to be able to show that ~f x = f y~. In
-  the list of known values it seems that we have a proof of ~x=y~ as
-  one of the arguments. Since we have a proof that ~x=y~, we should be
-  able to rewrite ~y~ to be ~x~ using reflexivity. In Idris this is
-  done by deconstructing the proof of ~x=y~ by pattern matching on the
-  argument.
+  the list of known values it seems that we have a proof of ~x=y~ from
+  one of the arguments to ~cong~. Since we have a proof that ~x=y~, we
+  should be able to rewrite ~y~ to be ~x~ using reflexivity. In Idris
+  this is done by deconstructing the proof of ~x=y~ by pattern
+  matching on the argument.
 
   #+BEGIN_SRC idris
     cong : (f : a -> b) -> x = y -> f x = f y
@@ -1023,14 +1023,23 @@ this is going to involve a little help from types.
           Main.cong_rhs_1 : f x = f x
   #+END_SRC
 
-  Perfect! It replaced ~y~ with ~x~ everywhere. Now we just need
-  something with the type ~f x = f x~, which is trivial, since if you
-  look at the definition of ~Refl~, that's pretty much exactly what it
-  does.
+  Perfect! If we have a proof that ~x = y~, then Idris knows that
+  they're interchangeable, and it automatically replaced ~y~ with ~x~
+  everywhere. Now we just need something with the type ~f x = f x~,
+  which is trivial, since if you look at the definition of ~Refl~,
+  that's pretty much exactly what it does. We just need to substitute
+  ~f x~ for the ~x~ in ~Refl~.
 
-  If we give Refl the arguments ~f x~, it should produce a type ~f x =
-  f x~. In Idris ~Refl~ uses implicit arguments, since it can often
-  infer what it should use in context, so we could just write:
+  #+BEGIN_SRC idris
+    Refl : x = x
+
+    -- So, if we just replace this general "x" with our "f x" we would get...
+    Refl : f x = f x
+  #+END_SRC
+  ~Refl~ actually 
+
+  In Idris ~Refl~ uses implicit arguments, since it can often infer
+  what it should use in context, so we could just write ~Refl~:
 
   #+BEGIN_SRC idris
     cong : (f : a -> b) -> x = y -> f x = f y
@@ -1043,5 +1052,159 @@ this is going to involve a little help from types.
     cong : (f : a -> b) -> x = y -> f x = f y
     cong f (Refl {x}) = Refl {x = f x}
   #+END_SRC
-  
+
+  I realize this is a bit confusing because there are ~x~'s in both
+  places, but the ~x~ in the definition of ~Refl~ is in a different
+  scope, and we're just substituting our ~f x~ for that ~x~, like an
+  argument to a function.
+
+** Slightly more complicated proof
+
+   Now that we have a proven congruence theorem we can construct some
+   more complex proofs. Let's write a function to do addition on
+   natural numbers and prove that it's associative.
+
+   In Idris natural numbers look like this:
+   
+   #+BEGIN_SRC idris
+     data Nat : Type where
+       0 : Nat
+       S : Nat -> Nat
+
+     -- 0 = 0
+     -- S 0 = 1
+     -- S (S 0) = 2
+     -- etc...
+
+     (+) : Nat -> Nat -> Nat
+     (+) 0 y = y
+     (+) (S x) y = S (x + y)
+   #+END_SRC
+
+   The 0 represents 0 (it's actually ~Z~, but I think writing 0 is
+   less confusing), and ~S~ stands for successor, which means "plus
+   one". So we have defined the set natural numbers recursively, by
+   adding one to the previous natural number. This gives us a unary
+   representation of the natural numbers that's very nice to work
+   with.
+
+   Similarly we can define addition recursively:
+   
+   - Zero plus any number is that number.
+   - One plus x added to y is x + y with one added to it.
+
+   Now let's define our theorem:
+   
+   #+BEGIN_SRC idris
+     plus_assoc : (x, y, z : Nat) -> x + (y + z) = (x + y) + z
+     plus_assoc x y z = ?plus_assoc_rhs
+   #+END_SRC
+
+   This just says that for all ~x~, ~y~, and ~z~ in the natural
+   numbers, ~x~ added to y + z is the same as x + y added to z.
+
+   To prove this kind of thing we often use induction. We've actually
+   already seen induction in Idris, it's just recursion. So we'll case
+   split on ~x~, which gives us a base case where ~x = 0~, and a case
+   where ~x = S k~.
+
+   #+BEGIN_SRC idris
+     plus_assoc : (x, y, z : Nat) -> x + (y + z) = (x + y) + z
+     plus_assoc Z y z = ?plus_assoc_rhs_1
+     plus_assoc (S k) y z = ?plus_assoc_rhs_2
+   #+END_SRC
+
+   We have some interesting holes now.
+
+   #+BEGIN_SRC idris
+     - + Main.plus_assoc_rhs_1 [P]
+      `--                      y : Nat
+                               z : Nat
+          ---------------------------------------------------------------
+           Main.plus_assoc_rhs_1 : 0 + (y + z) = (0 + y) + z
+
+     - + Main.plus_assoc_rhs_2 [P]
+      `--                      k : Nat
+                               y : Nat
+                               z : Nat
+          -----------------------------------------------------------------------
+           Main.plus_assoc_rhs_2 : (S k) + (y + z) = ((S k) + y) + z
+   #+END_SRC
+
+   For the first one we have to just realize that when we use ~Refl~,
+   Idris will try to evaluate both sides of the equals sign
+   completely. Because of how plus is defined, it can actually
+   evaluate these partially even though we don't know what ~y~ and ~z~
+   are. This just triggers the first case of our definition of plus,
+   where 0 is on the left side. So this goal is really:
+
+   #+BEGIN_SRC idris
+     - + Main.plus_assoc_rhs_1 [P]
+      `--                      y : Nat
+                               z : Nat
+          ---------------------------------------------------------------
+           Main.plus_assoc_rhs_1 : y + z = y + z
+   #+END_SRC
+
+   And we can satisfy this with reflexivity.
+
+   #+BEGIN_SRC idris
+     plus_assoc : (x, y, z : Nat) -> x + (y + z) = (x + y) + z
+     plus_assoc Z y z = Refl
+     plus_assoc (S k) y z = ?plus_assoc_rhs_2
+   #+END_SRC
+
+   The second hole is more complicated.
+
+   #+BEGIN_SRC idris
+     - + Main.plus_assoc_rhs_2 [P]
+      `--                      k : Nat
+                               y : Nat
+                               z : Nat
+          -----------------------------------------------------------------------
+           Main.plus_assoc_rhs_2 : (S k) + (y + z) = ((S k) + y) + z
+   #+END_SRC
+
+   Again, Idris can still evaluate this partially, so this goal is
+   really this:
+
+   #+BEGIN_SRC idris
+     - + Main.plus_assoc_rhs_2 [P]
+      `--                      k : Nat
+                               y : Nat
+                               z : Nat
+          -----------------------------------------------------------------------
+           Main.plus_assoc_rhs_2 : S (k + (y + z)) = S ((k + y) + z)
+   #+END_SRC
+
+   So it looks like we need to prove associativity... Which is what
+   we're trying to do.
+
+   But since Idris knows about recursion, we can actually call
+   ~plus_assoc~ on ~k~, ~y~, and ~z~ to get something with the type...
+
+   #+BEGIN_SRC idris
+     k + (y + z) = (k + y) + z
+   #+END_SRC
+
+   So we're almost there, we just need to be able to apply the
+   successor function on both sides of the equality. This is exactly
+   what congruence does:
+
+   #+BEGIN_SRC idris
+     cong : (f : a -> b) -> x = y -> f x = f y
+     cong f (Refl {x}) = Refl {x = f x}
+   #+END_SRC
+
+   If we give it a function, and something with an equality type, then
+   ~cong~ gives us an equality type with the function applied to both
+   sides.
+
+   #+BEGIN_SRC idris
+     plus_assoc : (x, y, z : Nat) -> x + (y + z) = (x + y) + z
+     plus_assoc Z y z = Refl
+     plus_assoc (S k) y z = cong S (plus_assoc k y z)
+   #+END_SRC
+
+   Which completes our proof!
 * Tactics
