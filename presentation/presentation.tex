@@ -1,0 +1,157 @@
+\documentclass{beamer}
+
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{color}
+
+% Colours for beamer.
+\setbeamercolor{frametitle}{fg=orange}
+\setbeamertemplate{itemize item}{\color{orange}$\blacksquare$}
+\setbeamertemplate{itemize subitem}{\color{orange}$\blacktriangleright$}
+
+% Colours for syntax highlighting
+\definecolor{syntax_red}{rgb}{0.7, 0.0, 0.0} % For strings
+\definecolor{syntax_green}{rgb}{0.15, 0.5, 0.25} % For comments
+\definecolor{syntax_purple}{rgb}{0.6, 0.0, 0.45} % For keywords
+
+
+% Haskell settings for lstlisting
+\lstset{language=Haskell,
+basicstyle=\ttfamily,
+keywordstyle=\color{syntax_purple}\bfseries,
+stringstyle=\color{syntax_red},
+commentstyle=\color{syntax_green},
+numbers=none,
+numberstyle=\color{black},
+stepnumber=1,
+numbersep=10pt,
+tabsize=4,
+showspaces=false,
+showstringspaces=false}
+
+\author{
+  Beck, Calvin\\
+  \href{mailto:hobbes@ualberta.ca}{hobbes@ualberta.ca}
+}
+
+\begin{document}
+
+\begin{frame}
+  \frametitle{A Journey Through Types}
+  \maketitle
+\end{frame}
+
+\section{Introduction}
+
+\begin{frame}
+  \frametitle{What is this Talk about?}
+
+  Types! This presentation hopes to address the following:
+
+  \begin{itemize}
+  \item How types make things easier to write.
+  \item How types can help you write correct software.
+  \end{itemize}
+
+  \pause
+
+  Somewhat of a whirlwind introduction. Let me know if you're lost,
+  because this talk is all over the place!
+\end{frame}
+
+\section{What are types, and how do they help us?}
+
+\begin{frame}[fragile]
+  \frametitle{What are we trying to solve?}
+
+  You think that this is normal...
+
+  \pause
+
+  \begin{lstlisting}[frame=single, language=Python, breaklines=true]
+    Traceback (most recent call last):
+      File "<stdin>", line 1, in <module>
+    TypeError: 'NoneType' object is not subscriptable
+  \end{lstlisting}
+
+  \pause
+
+  \huge{... It's not!}
+\end{frame}
+
+\begin{frame}
+  \frametitle{What is a type?}
+
+  A type describes what a value ``is''.
+
+  \pause
+
+  You have probably heard of this as ``how the bits are stored in memory.''
+
+  \pause
+
+  It's a bit more than that!
+
+  \pause
+
+  \begin{itemize}
+  \item Tell us how to use values.
+    \pause
+
+    \begin{itemize}
+    \item Tells us what operations are defined on the types.
+    \item Can you add things of this type?
+    \item Can a function take a value of this type as an argument?
+    \item What kind of stuff does this function return?
+    \end{itemize}
+
+  \pause
+
+  \item Documentation
+
+  \pause
+
+  \item Rejection of general nonsense: \(357^\text{circles}\)
+
+  \pause
+
+  \begin{itemize}
+  \item \huge{NO MORE NULL REFERENCE EXCEPTIONS!}
+  \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\section{The types you may have seen}
+
+\begin{frame}[fragile]
+  \begin{lstlisting}[frame=single, language=Python, breaklines=true, basicstyle=\ttfamily\tiny]
+     def my_sort(xs):
+         if xs == []:
+             return xs
+         else:
+             first_elem = xs[0]
+             rest = xs[1:]
+
+             smaller = my_sort([x for x in rest if x <= first_elem])
+             larger = my_sort([x for x in rest if x > first_elem])
+
+             return smaller + [first_elem] + larger
+
+
+     def my_factorial(n):
+         if n == 0:
+             return 1
+         else:
+             return n * my_factorial(n-1)
+  \end{lstlisting}
+
+  \begin{itemize}
+  \item No types to help document functions.
+  \item No types to catch errors at runtime.
+    \begin{itemize}
+    \item Tests can help...
+    \item But it's nice to not have to worry about certain errors at all.
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+\end{document}
