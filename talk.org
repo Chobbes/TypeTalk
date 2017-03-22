@@ -10,9 +10,9 @@ about:
 
 1) You should care, and you NEED to care about your software.
    Computers are undeniably integral to *every* aspect of our lives.
-   Ever larger portions of our lives are controlled by computers as
-   the days go by. Whether it's a voting machine, banking software, or
-   a component of a vehicle, there's always a programmer behind it
+   Every day ever larger portions of our lives are controlled by
+   computers. Whether it's a voting machine, banking software, or a
+   component of a vehicle, there's always a programmer behind it
    somewhere.
 
    This should terrify you if you have ever programmed before.
@@ -147,7 +147,7 @@ this is going to involve a little help from types.
    problems early on!?
 
    Just a hint, but this is very possible! And we're going to do it
-   will types!
+   with types!
 
 ** Java
 
@@ -338,7 +338,8 @@ this is going to involve a little help from types.
    this constraint, which also includes unorderable types like
    functions, or pictures. If the compiler lets you call mySort on a
    list of something, then that list can actually be sorted, and
-   you're guaranteed that things will just work!
+   you're guaranteed that things will just work! So that's one less
+   thing to worry about at runtime!
    
    Haskell is also a bit more strict about what its types mean. For
    instance we know that these functions can't return "None" or
@@ -375,12 +376,12 @@ this is going to involve a little help from types.
                     Nothing => putStrLn "Your entry does not appear in the dictionary."
    #+END_SRC
 
-   In this case you know that "getIndex" can return something like a
-   "null" value called "Nothing", but it could also return "Just" an
-   Integer. You have to explicitly unwrap these values, like in the
-   case statement, to get at the possible value. This might seem
-   tedious, but if you're a fancy Haskell person you might use "do"
-   notation, which does this automatically.
+   In this case you know that ~getIndex~ can return something like a
+   ~null~ value called ~Nothing~, but it could also return "Just" an
+   Integer. You have to explicitly unwrap these values to get at the
+   possible valuen, like in the case statement in ~main~. This might
+   seem tedious, but if you're a fancy Haskell person you might use
+   "do" notation, which does this automatically.
 
    #+BEGIN_SRC haskell
      -- Look up a word in the same position in a different dictionary.
@@ -448,11 +449,11 @@ this is going to involve a little help from types.
    #+END_SRC
 
    The ~()~'s essentially mean "void" or "no return value," we're just
-   printing stuff here. An "IO String", like getLine, is something
-   which gets a string value using IO. A function which computes its
-   return value based on an IO action will be forced to have an IO
-   type as well, so you can't hide IO actions in functions which
-   supposedly don't rely upon IO.
+   printing stuff so there's nothing valuable to return. An ~IO
+   String~, like ~getLine~, is something which gets a string value
+   using IO. A function which computes its return value based on an IO
+   action will be forced to have an IO type as well, so you can't hide
+   IO actions in functions which supposedly don't rely upon IO.
 
    It seems that Haskell satisfies most of our goals.
 
@@ -469,14 +470,16 @@ this is going to involve a little help from types.
    3. It allow us to specify properties, and guarantees within our programs. E.g., this function does not alter global state, or read from a file.
       + Functions are "pure", meaning they always produce the same output for the same input.
       + Special actions, like IO, are labeled in the type. So you can't use an IO value in a non-IO function.
-        * The IO action would cause the calling function to have an IO type. IO taints values.
+        * The IO action would cause the calling function to have an IO type. IO taints values, and can't be hidden.
 
    This is really great, and it's super helpful. There's a saying that
-   "if a Haskell function compiles, then it's probably correct"
+   "if a Haskell program compiles, then it's probably correct"
    because the type system ends up preventing a lot of errors. For
    instance, you never end up trying to index ~None~ like you would in
    Python. Think how much time you would save if you never ran into
-   that problem! However, we can do even better!
+   that problem! Quite a lot!
+
+   However, we can do even better!
 
 * Enter dependent types.
   There are some things that we just can't do even with Haskell's
@@ -561,15 +564,15 @@ this is going to involve a little help from types.
 
   And one thing that's cool about this is you can actually do some
   computations at the type level to make more complicated, generalized
-  functions.
+  functions. A classic example is appending two vectors together.
 
   #+BEGIN_SRC idris
     append : Vect n elem -> Vect m elem -> Vect (n + m) elem
   #+END_SRC
 
-  The lower case letters are "variables" again, in this case
-  meaning ~n~ and ~m~ can be any natural numbers, and ~elem~ can be
-  any type, since Vect is defined as follows:
+  The lower case letters in the type are "variables" again, in this
+  case meaning ~n~ and ~m~ can be any natural numbers, and ~elem~ can
+  be any type, this is because ~Vect~ is defined as follows:
 
   #+BEGIN_SRC idris
     data Vect : Nat -> Type -> Type where
@@ -578,11 +581,12 @@ this is going to involve a little help from types.
   #+END_SRC
 
   Meaning that the type constructor ~Vect~ takes a natural number, and
-  another type, in order to make a type.
+  another type, in order to make a full vector type.
 
   Idris has a lot of built in tools for generating your programs based
-  on their types. Since this type for append is actually pretty
-  specific, Idris is able to do a lot of the work for us.
+  on their types. Since this type for ~append~ is actually pretty
+  specific, Idris is able to do a lot of the work for us. Let's walk
+  through how that might work.
 
   #+BEGIN_SRC idris
     append : Vect n elem -> Vect m elem -> Vect (n + m) elem
@@ -590,10 +594,12 @@ this is going to involve a little help from types.
   #+END_SRC
 
   The thing on the right hand side is known as a "hole", and this is a
-  stand in for a value which Idris will fill in for us.
+  stand in for a value which Idris can potentially fill in for us, or
+  it can at least tell us the type of what we should put in the hole.
 
   Since Idris knows how types are constructed, we can have it
-  automatically perform a case split on the first argument.
+  automatically perform a case split on the first argument, leading to
+  this:
 
   #+BEGIN_SRC idris
     append : Vect n elem -> Vect m elem -> Vect (n + m) elem
@@ -610,7 +616,7 @@ this is going to involve a little help from types.
                           m : Nat
                          ys : Vect m elem
          ------------------------------------------
-          Main.append_rhs_1 : Vect (plus 0 m) elem
+          Main.append_rhs_1 : Vect (0 + m) elem
 
     - + Main.append_rhs_2 [P]
      `--               elem : Type
@@ -620,18 +626,18 @@ this is going to involve a little help from types.
                           k : Nat
                          xs : Vect k elem
          ----------------------------------------------
-          Main.append_rhs_2 : Vect (plus (S k) m) elem
+          Main.append_rhs_2 : Vect ((S k) + m) elem
   #+END_SRC
 
-  Above the dashed line you can see what variables we could have
-  access to, and what types they have. Underneath we have our hole,
+  Above the dashed line you can see what variables are in scope where
+  the hole is, and what types they have. Underneath we have our hole,
   and the type that it has.
 
   Idris is smart, so it can automatically find values that match a
   hole of a given type. For the first hole we know that it has type
-  ~Vect (plus 0 m) elem~, but Idris evaluates this to ~Vect m elem~,
-  and the only vector of length ~m~ that it has is ~ys~, so it just
-  happily fills this in for us, if we ask nicely!
+  ~Vect (0 + m) elem~, but Idris evaluates this to ~Vect m elem~, and
+  the only vector of length ~m~ that it has in scope is ~ys~, so it
+  just happily fills this in for us, if we ask nicely!
 
   #+BEGIN_SRC idris
     append : Vect n elem -> Vect m elem -> Vect (n + m) elem
@@ -650,12 +656,14 @@ this is going to involve a little help from types.
                           k : Nat
                          xs : Vect k elem
          ----------------------------------------------
-          Main.append_rhs_2 : Vect (plus (S k) m) elem
+          Main.append_rhs_2 : Vect ((S k) + m) elem
   #+END_SRC
 
   We can see that ~xs~ has been given the type ~Vect k elem~, which
   means that ~n = S k~, since ~xs~ is a part of the ~Vect n elem~
-  argument, just with one less element since ~x~ is split from it.
+  argument, just with one less element since ~x~ is split from it. ~S~
+  means successor, so ~S k~ is just the next natural number from ~k~,
+  so it's ~k+1~.
 
   Our goal is to make a vector with length ~S k + m~, which we can
   happily ask Idris to do, and it finds:
@@ -675,9 +683,9 @@ this is going to involve a little help from types.
       S : Nat -> Nat -- Successor (+1)
 
 
-    plus : Nat -> Nat -> Nat
-    plus 0 m = m
-    plus (S k) m = S (k `plus` m)
+    (+) : Nat -> Nat -> Nat
+    (+) 0 m = m
+    (+) (S k) m = S (k `plus` m)
 
 
     data Vect : Nat -> Type -> Type where
@@ -685,10 +693,11 @@ this is going to involve a little help from types.
       (::) : (x : a) -> Vect k a -> Vect (S k) a
   #+END_SRC
 
-  First, it evaluated ~plus (S k) m~, which turns out to be ~S (k +
+  First, it evaluated ~(S k) + m~, which turns out to be ~S (k +
   m)~. It looked at the type constructor for a vector and saw that in
   order to get a ~Vect (S (k + m)) elem~ it would need to concatenate
-  an element with a ~Vect (k+m) elem~, which gets us here...
+  an element with a ~Vect (k+m) elem~, which gets us two holes. One
+  for the element to concatenate, and one for the rest of the vector.
 
   
   #+BEGIN_SRC idris
@@ -726,13 +735,13 @@ this is going to involve a little help from types.
   #+BEGIN_SRC idris
     append : Vect n elem -> Vect m elem -> Vect (n + m) elem
     append [] ys = ys
-    append (x :: xs) ys = ?elem_to_concat :: ?rest_of_vect
+    append (x :: xs) ys = x :: ?rest_of_vect
   #+END_SRC
 
   It also knows about recursion, so it knows it has this function
-  ~append : Vect n elem -> Vect m elem -> Vect (n + m) elem~ which it
-  could call. And since it has a vector ~xs : Vect k elem~, and a
-  vector ~ys : Vect m elem~, it knows that
+  ~append~ which it could call that has a type ~Vect n elem -> Vect m
+  elem -> Vect (n + m) elem~. And since Idris has a vector ~xs : Vect
+  k elem~, and a vector ~ys : Vect m elem~, it knows that
 
   #+BEGIN_SRC idris
      append xs ys : Vect (k + m) elem
@@ -775,9 +784,9 @@ this is going to involve a little help from types.
    ~Fin len~ is a type which represents natural numbers strictly less
    than ~len~. So, given a vector of length ~len~, if we provide a
    natural number greater than or equal to ~len~ as the index, then it
-   would not be an element of the ~Fix len~ type, so the program would
+   would not be an element of the ~Fin len~ type, so the program would
    not type check, catching any potential bugs where you might walk
-   off the end of an array at compile time.
+   off the end of an array at compile time. Here's a quick example:
 
    #+BEGIN_SRC idris
      cats : Vect 2 String
@@ -832,7 +841,7 @@ this is going to involve a little help from types.
   Right now I'm using plain English to convey these propositions to
   you, but often they'll be more mathematical statements, such as:
 
-  $$\forall n, \exists n \in \mathrm{N} \text{ such that } n > m$$
+  $$\forall n \in \mathrm{N}, \exists m \in \mathrm{N} \text{ such that } m > n$$
 
   Propositions are built up from a set of axioms, which are just rules
   describing your mathematical objects, and propositions can be
@@ -847,9 +856,9 @@ this is going to involve a little help from types.
   - Negation
     + $\neg P$, meaning "P is false."
   - Universal quantification
-    + $\forall x, P(x)$, meaning whenever we substitute any value for ~x~ in ~P~, the proposition ~P~ holds true.
+    + $\forall x, P(x)$, meaning whenever we substitute any value for ~x~ in ~P~, the proposition ~P(x)~ holds true.
   - Existential quantification
-    + $\exists x, P(x)$, meaning we can find an ~x~ that we can substitute into ~P~ to make the proposition hold.
+    + $\exists x, P(x)$, meaning we can find an ~x~ that we can substitute into ~P(x)~ to make the proposition hold.
 
 ** Inference rules
    There are some basic axioms for how you can work with these
@@ -870,9 +879,10 @@ this is going to involve a little help from types.
   This means that if I have a proof of the proposition P, then I can
   produce a proof of the proposition Q.
 
-  That's very similar to a function type in something like Haskell. If
-  I'm given a value of type P, then I can produce a value of type
-  Q. So function application seems to be identical to modus ponens.
+  That's very similar to a function type in something like Haskell or
+  Idris. If I'm given a value of type P, then I can produce a value of
+  type Q. So function application seems to be identical to modus
+  ponens.
 
   #+BEGIN_SRC haskell
     p -> q
@@ -907,8 +917,8 @@ this is going to involve a little help from types.
   What are the values of a type then? Well, they look a lot like an
   existence proof of a given proposition. For instance:
 
-  #+BEGIN_SRC haskell
-    const :: p -> q -> p
+  #+BEGIN_SRC idris
+    const : p -> q -> p
     const a b = a
   #+END_SRC
 
@@ -916,8 +926,9 @@ this is going to involve a little help from types.
   element, can be seen as a proof of the proposition $p \rightarrow q
   \rightarrow p$. You take the proof of the first proposition in the
   chain of implications, and return it as a proof of the same
-  proposition at the end of the implication chain. Which makes sense
-  to me!
+  proposition at the end of the implication chain. So, given a proof
+  of $p$ and a proof of $q$, if we take the proof of $p$ and discard
+  the proof of $q$, then we can prove $p$. Which makes sense to me!
 
   We can also see how the type checker can prevent us from proving
   false propositions. For instance, you can't prove $p \rightarrow q$,
@@ -925,7 +936,7 @@ this is going to involve a little help from types.
   another proposition $p$, when both $q$ and $p$ could be any random
   proposition!
   
-  #+BEGIN_SRC haskell
+  #+BEGIN_SRC idris
     bogus : p -> q
     bogus p = -- What can I put here that would type check? :(
   #+END_SRC
@@ -936,7 +947,7 @@ this is going to involve a little help from types.
 
   I'm going to quickly show you some basic proofs in Idris. With any
   luck you can at least imagine how these proofs might be extended to
-  more complex programs!
+  more complicated programs!
 
   Idris has a type which represents equality between two things. This
   type is constructed, as you might expect, with the equals sign.
@@ -977,7 +988,7 @@ this is going to involve a little help from types.
 
   ~cong~ stands for congruence, and has a type which represents the
   proposition that, if you are given a function ~f~, and you know that
-  some ~x~ and ~y~ are equal, then ~f x = f y~.
+  some ~x~ and ~y~ are equal, then ~f x = f y~ as well.
 
   This might seem really odd and scary right now, because you have
   equals signs in your types. But remember, types are propositions of
@@ -1001,10 +1012,10 @@ this is going to involve a little help from types.
 
   So, it looks like we need to be able to show that ~f x = f y~. In
   the list of known values it seems that we have a proof of ~x=y~ from
-  one of the arguments to ~cong~. Since we have a proof that ~x=y~, we
-  should be able to rewrite ~y~ to be ~x~ using reflexivity. In Idris
-  this is done by deconstructing the proof of ~x=y~ by pattern
-  matching on the argument.
+  one of the arguments to ~cong~. And since we have a proof that
+  ~x=y~, we should be able to rewrite ~y~ to be ~x~ using
+  reflexivity. In Idris this is done by deconstructing the proof of
+  ~x=y~ by pattern matching on the argument.
 
   #+BEGIN_SRC idris
     cong : (f : a -> b) -> x = y -> f x = f y
@@ -1086,7 +1097,7 @@ this is going to involve a little help from types.
    one". So we have defined the set natural numbers recursively, by
    adding one to the previous natural number. This gives us a unary
    representation of the natural numbers that's very nice to work
-   with.
+   with, it's similar to tallies.
 
    Similarly we can define addition recursively:
    
@@ -1101,12 +1112,12 @@ this is going to involve a little help from types.
    #+END_SRC
 
    This just says that for all ~x~, ~y~, and ~z~ in the natural
-   numbers, ~x~ added to y + z is the same as x + y added to z.
+   numbers, ~x~ added to ~y + z~ is the same as ~x + y~ added to ~z~.
 
    To prove this kind of thing we often use induction. We've actually
-   already seen induction in Idris, it's just recursion. So we'll case
+   already seen induction in Idris. It's just recursion. So we'll case
    split on ~x~, which gives us a base case where ~x = 0~, and a case
-   where ~x = S k~.
+   where ~x = S k~ for some natural number ~k~.
 
    #+BEGIN_SRC idris
      plus_assoc : (x, y, z : Nat) -> x + (y + z) = (x + y) + z
@@ -1196,9 +1207,9 @@ this is going to involve a little help from types.
      cong f (Refl {x}) = Refl {x = f x}
    #+END_SRC
 
-   If we give it a function, and something with an equality type, then
-   ~cong~ gives us an equality type with the function applied to both
-   sides.
+   If we give ~cong~ a function, and something with an equality type,
+   then ~cong~ gives us an equality type with the function applied to
+   both sides. So we can do this:
 
    #+BEGIN_SRC idris
      plus_assoc : (x, y, z : Nat) -> x + (y + z) = (x + y) + z
@@ -1215,18 +1226,20 @@ this is going to involve a little help from types.
 
 * Tactics
 
-  Sometimes building up proof terms in this functional style is a bit
-  tedious. Once you get more complicated proofs on the go it gets
-  pretty hard to keep track of all of the types. There are other
-  languages which use a different style of proof based on tactics,
-  which are little commands that build up these proof terms behind the
-  scenes for you.
+  Sometimes building up proof terms in this functional programming
+  style is a bit tedious. Once you get more complicated proofs on the
+  go it gets pretty hard to keep track of all of the types. There are
+  other languages which use a different style of proof based on
+  tactics, which are little commands that build up these proof terms
+  behind the scenes for you.
 
   These languages are interesting to work with, but the proofs are
   actually pretty hard to read without the proof state shown, which
   editors for these languages will display nicely. The proof state is
   just your current goal type, and it displays it in much the same
   fashion as Idris displays its goals.
+
+  Here's an example of the associativity proof we just did in Coq:
 
   #+BEGIN_SRC coq
     Inductive nat : Type :=
@@ -1250,3 +1263,24 @@ this is going to involve a little help from types.
         reflexivity.
     Qed.
   #+END_SRC
+
+  It's actually pretty similar, and you can maybe get some idea of how
+  the tactics translate into the functions from before. We break
+  things into cases much the same way with the induction tactic.
+
+  - The base case is just handled with reflexivity.
+  - Then, after simplifying the types by evaluation much like in Idris,
+    we apply the theorem inductively, and then use reflexivity to handle
+    the case of ~x = S k~.
+
+  These tactics look pretty weird when you first see them, but if you
+  start thinking about how they get turned into proof terms like in
+  the Idris examples, it becomes a lot easier to understand.
+
+* Conclusion
+
+  So, that's the end of the talk. It's just a rough overview of why
+  types are so magical, and why you should care about them.
+
+  I realize that this was quite the whirlwind introduction to this
+  topic, so if you have any questions feel free to ask!
