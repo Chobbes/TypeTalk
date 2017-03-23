@@ -12,13 +12,13 @@
 % Colours for syntax highlighting
 \definecolor{syntax_red}{rgb}{0.7, 0.0, 0.0} % For strings
 \definecolor{syntax_green}{rgb}{0.15, 0.5, 0.25} % For comments
-\definecolor{syntax_purple}{rgb}{0.6, 0.0, 0.45} % For keywords
+\definecolor{syntax_orange}{rgb}{0.7, 0.4, 0.2} % For keywords
 
 
 % Haskell settings for lstlisting
 \lstset{language=Haskell,
 basicstyle=\ttfamily,
-keywordstyle=\color{syntax_purple}\bfseries,
+keywordstyle=\color{syntax_orange}\bfseries,
 stringstyle=\color{syntax_red},
 commentstyle=\color{syntax_green},
 numbers=none,
@@ -124,6 +124,7 @@ showstringspaces=false}
 \section{The types you may have seen}
 
 \begin{frame}[fragile]
+  \frametitle{The types you may have seen: Python}
   \begin{lstlisting}[frame=single, language=Python, breaklines=true, basicstyle=\ttfamily\tiny]
      def my_sort(xs):
          if xs == []:
@@ -145,13 +146,208 @@ showstringspaces=false}
              return n * my_factorial(n-1)
   \end{lstlisting}
 
+  \pause
   \begin{itemize}
   \item No types to help document functions.
-  \item No types to catch errors at runtime.
+
+  \pause
+  \item No types to catch errors at compile time.
     \begin{itemize}
+    \pause
     \item Tests can help...
+    \pause
     \item But it's nice to not have to worry about certain errors at all.
     \end{itemize}
   \end{itemize}
 \end{frame}
+
+\begin{frame}
+  \frametitle{The types you may have seen: Python}
+
+  \begin{itemize}
+  \item What if we could force functions to be compartmentalized?
+    \begin{itemize}
+    \item No sneaky IO
+    \item No hidden global states
+    \end{itemize}
+    
+  \pause
+  \item Wouldn't it be nice to have a description of what a function can and can't do in a concise format?
+
+  \pause
+  \item Could the compiler tell us when our function deviates from these descriptions?
+    \begin{itemize}
+    \item Why wait until runtime to find your mistakes?
+    \end{itemize}
+
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{The types you may have seen: Java}
+
+  \begin{lstlisting}[frame=single, language=Java, breaklines=true, basicstyle=\ttfamily\tiny]
+     Integer factorial(Integer n) {
+         if (n == 0) {
+             return 1;
+         }
+         else {
+             return n * factorial(n - 1);
+         }
+     }
+
+     ArrayList<Integer> my_sort(ArrayList<Integer> xs) {
+         if (xs.size() == 0) {
+             return new ArrayList<Integer>();
+         }
+         else {
+             // ...
+             // Calvin is too lazy to write Java
+             // ...
+         }
+     }
+   \end{lstlisting}
+
+   \begin{itemize}
+   \pause
+   \item Can see what functions accept and return!
+   \pause
+   \item Null references... :c
+   \pause
+   \item Very verbose. Lots of additional syntactic cruft.
+   \end{itemize}
+
+   \pause
+
+   Types aren't bad... \pause Java is bad.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Greener pastures and better ideas}
+
+  What do we want in our types?
+
+  \begin{itemize}
+    \pause
+  \item Catch errors at compile time!
+    \begin{itemize}
+    \item If something is ``wrong'', then why wait for runtime to tell us?
+    \end{itemize}
+    \pause
+  \item Ease reading and writing of programs.
+    \begin{itemize}
+    \item Act as a kind of documentation.
+    \item Guide us when writing programs.
+    \item Stop us from making mistakes.
+    \end{itemize}
+    \pause
+  \item Not too much verbosity.
+    \begin{itemize}
+    \item Nice, clean syntax!
+    \end{itemize}
+  \end{itemize}   
+\end{frame}
+
+\section{Haskell}
+
+\begin{frame}[fragile]
+  \frametitle{Introducing Haskell!}
+  \begin{lstlisting}[frame=single, language=Java, breaklines=true, basicstyle=\ttfamily\tiny]
+     def my_sort(xs):
+         if xs == []:
+             return xs
+         else:
+             first_elem = xs[0]
+             rest = xs[1:]
+
+             smaller = my_sort([x for x in rest if x <= first_elem])
+             larger = my_sort([x for x in rest if x > first_elem])
+
+             return smaller + [first_elem] + larger
+
+
+     def my_factorial(n):
+         if n == 0:
+             return 1
+         else:
+             return n * my_factorial(n-1)
+  \end{lstlisting}
+
+  \pause
+
+  \begin{lstlisting}[frame=single, language=Haskell, breaklines=true, basicstyle=\ttfamily\tiny]
+     mySort :: Ord a => [a] -> [a]
+     mySort [] = []
+     mySort (first_elem::rest) = smaller ++ [first_elem] ++ larger
+       where smaller = mySort [x | x <- rest, x <= first_elem]
+             larger = mySort [x | x <- rest, x > first_elem]
+
+
+     factorial :: Integer -> Integer
+     factorial 0 = 1
+     factorial n = n * factorial (n - 1)
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+    \frametitle{Introducing Haskell!}
+    \begin{lstlisting}[frame=single, language=Haskell, breaklines=true, basicstyle=\ttfamily\tiny]
+     mySort :: Ord a => [a] -> [a]
+     mySort [] = []
+     mySort (first_elem::rest) = smaller ++ [first_elem] ++ larger
+       where smaller = mySort [x | x <- rest, x <= first_elem]
+             larger = mySort [x | x <- rest, x > first_elem]
+
+
+     factorial :: Integer -> Integer
+     factorial 0 = 1
+     factorial n = n * factorial (n - 1)
+   \end{lstlisting}
+
+   \begin{itemize}
+   \item Type inference: compiler can figure out the types of things.
+   \item Nice, relatively specific types.
+     \begin{lstlisting}[frame=single, language=Haskell, breaklines=true, basicstyle=\ttfamily\tiny]
+       -- Causes a type error, because it doesn't make sense.
+       mySort [factorial, (*2)]
+     \end{lstlisting}
+
+     Something similar in Python would only be caught at runtime
+   \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{We need \texttt{Ord}!}
+  You might think you could do this:
+
+  \begin{lstlisting}[frame=single, language=Haskell, breaklines=true, basicstyle=\ttfamily\tiny]
+     -- Instead of: Ord a => [a] -> [a]
+     mySort :: [a] -> [a]
+     mySort [] = []
+     mySort (first_elem::rest) = smaller ++ [first_elem] ++ larger
+       where smaller = mySort [x | x <- rest, x <= first_elem]
+             larger = mySort [x | x <- rest, x > first_elem]
+   \end{lstlisting}
+
+   \pause
+
+   ... But this actually causes a type error!
+
+   \pause
+
+   \begin{itemize}
+   \item $a$ could be \emph{any type}
+   \item This type could be unorderable
+     \begin{itemize}
+     \item Like a function, or a picture
+     \end{itemize}
+   \item Need the constraint so we know we can perform comparisons!
+   \end{itemize}
+
+   \pause
+
+   Haskell makes sure we can only perform operations that are defined on values of a given type, but allows us to be general about it. This function works with any orderable element still, and not just a fixed type.
+   
+\end{frame}
+
 \end{document}
