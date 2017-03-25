@@ -350,4 +350,180 @@ showstringspaces=false}
    
 \end{frame}
 
+\begin{frame}
+  \frametitle{More care in a type}
+
+  Haskell is somewhat careful about what values inhabit a type.
+
+  \pause
+  \begin{itemize}
+  \item No ``null'' values which inhabit every type.
+  \pause
+  \item This keeps it so that, for the most part, elements of a type act the same way.
+  \pause
+  \item Operations on elements of a type work on all values, so no runtime exceptions are raised!
+  \end{itemize}
+
+  \pause
+
+  This helps to keep everything sane!
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Maybe maybe!}
+
+  Sometimes you need something \emph{like} a null. Maybe a function can't always compute an answer! \\~\\
+
+  \pause
+  Enter maybe types: \\~\\
+
+  \begin{lstlisting}[frame=single, language=Haskell, breaklines=true, basicstyle=\ttfamily\tiny]
+    data Maybe a = Just a | Nothing
+  \end{lstlisting}
+
+  \pause
+
+  \begin{itemize}
+  \item Not just null!
+  \pause
+  \item Type checker can tell us when we need to handle null.
+  \pause
+  \item Compile time errors if we don't handle null!
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Maybe examples}
+
+  \begin{lstlisting}[frame=single, language=Haskell, breaklines=true, basicstyle=\ttfamily\tiny]
+     -- Find out where a value is in a function.
+     getIndex :: Eq a => a -> [a] -> Maybe Integer
+     getIndex = getIndexAcc 0
+
+     -- Helper function that remembers our position in the list.
+     getIndexAcc :: Eq a => Integer -> a -> [a] -> Maybe Integer
+     getIndexAcc pos value [] = Nothing
+     getIndexAcc pos value (x::xs) = if x == value
+                                        then Just pos
+                                        else getIndexAcc (pos+1) xs
+
+     -- A dictionary of all the important words.
+     dictionary :: [String]
+     dictionary = ["cats", "sandwiches", "hot chocolate"]
+
+     main :: IO ()
+     main = do entry <- getLine
+               case getIndex entry dictionary of
+                    (Just pos) => putStrLn "Your entry is at position " ++ show pos ++ " in the dictionary."
+                    Nothing => putStrLn "Your entry does not appear in the dictionary."
+  \end{lstlisting}
+
+  \begin{itemize}
+  \pause
+  \item You know \texttt{getIndex} can yield a ``null'' value (\textt{Nothing}). Just from type.
+  \pause
+  \item Could also be a \texttt{Just <Integer>}, such as \texttt{Just 3}.
+  \pause
+  \item You have to explicitly unwrap these values (see \textt{main}) to get at the possible value!
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Maybe more!}
+
+  Seems tedious? It's not! Good syntax makes this easy!
+  \begin{lstlisting}[frame=single, language=Haskell, breaklines=true, basicstyle=\ttfamily\tiny]
+-- Look up a word in the same position in a different dictionary.
+dictionary :: [String]
+dictionary = ["cats", "sandwiches", "hot chocolate"]
+
+
+synonyms :: [String]
+synonyms = ["meows", "bread oreos", "sweet nectar"]
+
+
+moreSynonyms :: [String]
+moreSynonyms = ["floofs", "subs", "hot coco"]
+
+
+getIndex :: Integer -> [a] -> Maybe a
+getIndex _ [] = Nothing
+getIndex 0 (x:xs) = Just x
+getIndex n (_:xs) = getIndex (n-1) xs
+  \end{lstlisting}
+
+  More on next slide...
+
+\end{frame}
+
+\begin{frame}[fragile]
+  Seems tedious? It's not! Good syntax makes this easy!
+
+  \begin{lstlisting}[frame=single, language=Haskell, breaklines=true, basicstyle=\ttfamily\tiny]
+lookupSynonyms :: String -> Maybe (String, String)
+lookupSynonyms word = do index <- getIndex word dictionary
+
+                         -- Lookup my synonyms, if anything fails return Nothing.
+                         firstSynonym <- getIndex index synonyms
+                         secondSynonym <- getIndex index moreSynonyms
+
+                         -- Success! Return Just the synonyms.
+                         Just (firstSynonym, secondSynonym)
+
+-- lookupSynonyms essentially desugars to this.
+-- The compiler can help avoid this tedium!
+painfulLookupSynonyms :: String -> Maybe (String, String)
+painfulLookupSynonyms word = case getIndex word dictionary of
+                                  Nothing -> Nothing
+                                  (Just index) ->
+                                    case getIndex index synonyms of 
+                                         Nothing -> Nothing
+                                         (Just first) ->
+                                           case getIndex index moreSynonyms of
+                                                Nothing -> Nothing
+                                                (Just second) -> Just (first, second)
+
+main :: IO ()
+main = do word <- getLine
+          case lookupSynonym word of
+            Nothing -> putStrLn ("Hmmm, I don't know a synonym for " ++ word)
+            (Just synonym) -> putStrLn ("I think " ++ word ++ "'s are a lot like " ++ synonym ++ "'s!")
+  \end{lstlisting}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{IO types}
+
+  \begin{lstlisting}[frame=single, language=Haskell, breaklines=true, basicstyle=\ttfamily\tiny]
+     -- putStrLn :: IO ()
+     -- getLine :: IO String
+
+     main :: IO ()
+     main = do putStrLn "What is your name?"
+               name <- getLine
+               putStrLn ("Hello, " ++ name)
+  \end{lstlisting}
+
+  \begin{itemize}
+  \pause
+  \item \texttt{()} is ``void'' --- no return value.
+  \pause
+  \item \texttt{IO} means a function performs input / output.
+    \begin{itemize}
+    \pause
+    \item Reads from disk, or stdin
+    \pause
+    \item Writes to disk, prints to screen
+    \pause
+    \item etc...
+    \end{itemize}
+  \item No escaping \texttt{IO}. Taints anything using it, so you know if something does input / output.
+  \pause
+  \item Can help avoid unexpected behaviour.
+  \end{itemize}
+
+\end{frame}
+
 \end{document}

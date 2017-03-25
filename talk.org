@@ -379,7 +379,7 @@ this is going to involve a little help from types.
    In this case you know that ~getIndex~ can return something like a
    ~null~ value called ~Nothing~, but it could also return "Just" an
    Integer. You have to explicitly unwrap these values to get at the
-   possible valuen, like in the case statement in ~main~. This might
+   possible value, like in the case statement in ~main~. This might
    seem tedious, but if you're a fancy Haskell person you might use
    "do" notation, which does this automatically.
 
@@ -409,7 +409,7 @@ this is going to involve a little help from types.
                               -- Lookup my synonyms, if anything fails return Nothing.
                               firstSynonym <- getIndex index synonyms
                               secondSynonym <- getIndex index moreSynonyms
-                         
+
                               -- Success! Return Just the synonyms.
                               Just (firstSynonym, secondSynonym)
 
@@ -438,12 +438,11 @@ this is going to involve a little help from types.
    types. For example:
 
    #+BEGIN_SRC haskell
-     -- putStr :: IO ()
      -- putStrLn :: IO ()
      -- getLine :: IO String
 
      main :: IO ()
-     main = do putStr "What is your name? "
+     main = do putStrLn "What is your name?"
                name <- getLine
                putStrLn ("Hello, " ++ name)
    #+END_SRC
