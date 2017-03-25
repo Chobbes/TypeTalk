@@ -17,13 +17,15 @@
 
 % Haskell settings for lstlisting
 \lstset{language=Haskell,
-basicstyle=\ttfamily,
+basicstyle=\ttfamily\tiny,
 keywordstyle=\color{syntax_orange}\bfseries,
 stringstyle=\color{syntax_red},
 commentstyle=\color{syntax_green},
 numbers=none,
 numberstyle=\color{black},
 stepnumber=1,
+frame=single,
+breaklines=true,
 numbersep=10pt,
 tabsize=4,
 showspaces=false,
@@ -490,7 +492,30 @@ main = do word <- getLine
             Nothing -> putStrLn ("Hmmm, I don't know a synonym for " ++ word)
             (Just synonym) -> putStrLn ("I think " ++ word ++ "'s are a lot like " ++ synonym ++ "'s!")
   \end{lstlisting}
+\end{frame}
 
+\begin{frame}
+  \frametitle{Last words on Maybe}
+  
+  If you're a JavaScript programmer you've probably encountered
+  promises. In a language like Haskell you could also have a promise
+  type, which is similar to \texttt{Maybe}. Imagine having:
+
+  \begin{itemize}
+  \pause
+  \item The type checker tell you when you forgot to ``unwrap'' a promise.
+  \pause
+  \item Do notation which lets you string promises together with no syntactic overhead.
+  \pause
+  \item Not having to write JavaScript ;)
+  \end{itemize}
+
+  Having a good type system in an expressive language, like Haskell,
+  can really help ease a lot of the pain you currently suffer.
+
+  \pause \\~\\
+
+  Programming can be good?
 \end{frame}
 
 \begin{frame}[fragile]
@@ -521,9 +546,229 @@ main = do word <- getLine
     \end{itemize}
   \item No escaping \texttt{IO}. Taints anything using it, so you know if something does input / output.
   \pause
-  \item Can help avoid unexpected behaviour.
+  \item Can help avoid unexpected behaviour, similar to global state changing a functions behaviour.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Haskell in summary: what does it buy us?}
+
+  \begin{itemize}
+  \item We can catch errors at compile time!
+    \begin{itemize}
+    \item Type system lets us describe values in a fair amount of detail, which removes a lot of obviously incorrect programs from the set of programs that compile.
+    \item Types don't contain nulls. Very few values which cause explosions at runtime.
+    \end{itemize}
+  \item Easier to read and write programs. Types of functions are very descriptive!
+    \begin{itemize}
+    \item Types help in much the same way as test driven development (but they're always there, unlike tests!)
+      \begin{itemize}
+      \item Makes you think about arguments a function takes, and what it returns
+      \end{itemize}
+    \item Types point out errors when developing, such as forgetting to unwrap a Maybe value.
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{What more does it buy us?}
+  \begin{itemize}
+  \item Types can be very general, allowing us to reuse functions with any type that makes sense.
+    \begin{itemize}
+    \item \texttt{mySort} works with any list of orderable elements!
+    \end{itemize}
+  \item It allows us to specify properties and guarantees within our programs.
+    \begin{itemize}
+    \item ``This function does not alter global state, or read from a file''.
+    \item Functions are ``pure''.
+    \item Special actions, like \textt{IO}, are clearly labeled.
+    \end{itemize} 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Enter dependent types}
+
+  There are some things that we just can't do with Haskell's types.
+
+  \pause \\~\\
+
+  Can write this:
+
+  \begin{lstlisting}[frame=single, language=Haskell, breaklines=true, basicstyle=\ttfamily\tiny]
+    index :: Integer -> [a] -> Maybe a
+    index 0 [] = Nothing
+    index 0 (x::xs) = Just x
+    index n (x::xs) = index (n-1) xs
+  \end{lstlisting}
+
+  \pause
+  But can't just avoid calling an index function when the index is out of range:
+
+  \begin{lstlisting}[frame=single, language=Haskell, breaklines=true, basicstyle=\ttfamily\tiny]
+    -- Want the integer argument to always be in range so we don't need Maybe!
+    index :: Integer -> [a] -> a
+    index 0 [] = error "Uh... Whoops, walking off the end of the list!"
+    index 0 (x :: xs) = x
+    index n (x :: xs) = index (n-1) xs
+  \end{lstlisting}
+
+  \pause \\~\\
+
+  \begin{itemize}
+  \item Need to encode length of the list into the type.
+  \item Can't do this in Haskell because a type can not depend upon a value.
+    \begin{itemize}
+    \item Length in the type must depend upon the length of the list value.
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{More motivation...}
+
+  Also not possible to encode specific properties which depend upon values in types.
+
+  \begin{lstlisting}[frame=single, language=Haskell, breaklines=true, basicstyle=\ttfamily\tiny]
+    mySort :: Ord a => [a] -> [a]
+    mySort [] = []
+    mySort (first_elem::rest) = smaller ++ [first_elem] ++ larger
+      where smaller = mySort [x | x <- rest, x <= first_elem]
+            larger = mySort [x | x <- rest, x > first_elem]
+  \end{lstlisting}
+
+  \pause
+  Would be nice to encode into the type of \texttt{mySort} that...
+  
+  \begin{itemize}
+  \pause
+  \item Output list must be in ascending order.
+  \pause
+  \item Output list must contain the same values as the input list.
   \end{itemize}
 
+  \pause
+
+  This would prove that the program works! \texttt{mySort} would be
+  guaranteed to sort a list in ascending order if the program type
+  checks!
+
+  \pause
+
+  We can do this kind of thing with dependent types. We'll look at
+  some basic examples in Idris, a programming language like Haskell, but
+  with dependent types.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Dependent types in Idris}
+
+  Vectors are a classic example of dependent types!
+
+  \begin{itemize}
+  \pause
+  \item Like lists, but...
+  \pause
+  \item They include the length of the list in the type.
+  \end{itemize}
+
+  \begin{lstlisting}[frame=single, language=Idris, breaklines=true, basicstyle=\ttfamily\tiny]
+    two_little_piggies : Vect 2 String
+    two_little_piggies = ["Oinkers", "Snorkins"]
+
+    -- This would be a type error, caught at compilation:
+    three_little_piggies : Vect 3 String
+    three_little_piggies = two_little_piggies
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Append and the type level computations}
+
+  Computations at the type level allow us to make some more complicated, generalized functions.
+
+  \pause
+
+  \begin{lstlisting}[language=Idris]
+    append : Vect n elem -> Vect m elem -> Vect (n + m) elem
+  \end{lstlisting}
+
+  \pause
+
+  \texttt{n}, \texttt{m}, and \texttt{(n + m)} are all natural numbers, and \texttt{elem} is any type.
+
+  \pause
+
+  \begin{lstlisting}[language=Idris]
+    data Vect : Nat -> Type -> Type where
+      Nil : Vect 0 a
+      (::) : (x : a) -> Vect k a -> Vect (S k) a
+  \end{lstlisting}
+
+  \begin{itemize}
+  \pause
+  \item The full \texttt{Vect} type constructed from natural number value for length, and a type for the elements.
+  \pause
+  \item Two constructors define the type recursively (called an inductive type -- we'll see why later).
+    \begin{itemize}
+    \item One for the empty vector.
+    \item Single value concatenated to another vector to make a vector with 1 more element. \textt{S} is successor of natural numbers, +1.
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Types and automation}
+
+  Idris can help us generate programs based on the types. (All the steps you will see are done automatically by Idris).
+
+  \pause \\~\\
+
+  We can ask idris to start our function definition based on the type:
+
+  \begin{lstlisting}[language=Idris]
+    append : Vect n elem -> Vect m elem -> Vect (n + m) elem
+    append xs ys = ?append_rhs
+  \end{lstlisting}
+
+  \pause
+  \texttt{?append\_rhs} is a hole. It's a stand in for a value we need
+  to provide. Idris can tell us the type of a hole, and potentially fill
+  it in for us. It also tells us types of what's in scope for the hole. This looks like this:
+
+  \pause \\~\\
+
+  \begin{lstlisting}[language=Idris]
+- + Main.append_rhs [P]
+ `--             elem : Type
+                    m : Nat
+                   ys : Vect m elem
+                    n : Nat
+                   xs : Vect n elem
+     ----------------------------------------
+      Main.append_rhs : Vect (plus n m) elem
+  \end{lstlisting}
+
+  
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Types and automation}
+  \begin{onlyenv}<1>
+    Hey Idris...
+    \begin{lstlisting}[language=Idris]
+    append : Vect n elem -> Vect m elem -> Vect (n + m) elem
+    append xs ys = ?append_rhs      
+    \end{lstlisting}
+  \end{onlyenv}
+  \begin{onlyenv}<2>
+    Do a case split on the first argument.
+    \begin{lstlisting}[language=Idris]
+    append : Vect n elem -> Vect m elem -> Vect (n + m) elem
+    append [] ys = ?append_rhs_1
+    append (x :: xs) ys = ?append_rhs_2
+    \end{lstlisting}
+  \end{onlyenv}
 \end{frame}
 
 \end{document}

@@ -238,7 +238,15 @@ this is going to involve a little help from types.
    Haskell. Haskell is a programming language which treats types
    well. The syntax may be a little different than what you're used
    to, but it's surprisingly clean, concise, and precise. Haskell is
-   quite a mathematical language.
+   quite a mathematical language. Haskell is a pure language meaning
+   that whenever you call a function with the same inputs, it produces
+   the same outputs, which can help you understand your programs a lot
+   better. In Haskell there is no immutable state, when you give a
+   variable a value that value can't change. This sounds limiting, but
+   it's really not, you won't even notice in the examples. But it
+   helps you undestand your programs a lot better. You only have to
+   look for where ~x~ is assigned to understand what value ~x~ has;
+   you need not scrutinize the entire program.
 
    Recall the Python programs from earlier:
 
@@ -569,9 +577,9 @@ this is going to involve a little help from types.
     append : Vect n elem -> Vect m elem -> Vect (n + m) elem
   #+END_SRC
 
-  The lower case letters in the type are "variables" again, in this
-  case meaning ~n~ and ~m~ can be any natural numbers, and ~elem~ can
-  be any type, this is because ~Vect~ is defined as follows:
+  The lower case identifiers in the type are "variables" again, in
+  this case meaning ~n~ and ~m~ can be any natural numbers, and ~elem~
+  can be any type, this is because ~Vect~ is defined as follows:
 
   #+BEGIN_SRC idris
     data Vect : Nat -> Type -> Type where
