@@ -692,7 +692,7 @@ this is going to involve a little help from types.
 
     (+) : Nat -> Nat -> Nat
     (+) 0 m = m
-    (+) (S k) m = S (k `plus` m)
+    (+) (S k) m = S (k + m)
 
 
     data Vect : Nat -> Type -> Type where
@@ -733,7 +733,7 @@ this is going to involve a little help from types.
                           k : Nat
                          xs : Vect k elem
          ------------------------------------------
-          Main.rest_of_vect : Vect (plus k m) elem
+          Main.rest_of_vect : Vect (k + m) elem
   #+END_SRC
 
   So, Idris knows of one element with the type ~elem~, and that's ~x~,

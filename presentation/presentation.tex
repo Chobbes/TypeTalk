@@ -746,7 +746,7 @@ main = do word <- getLine
                     n : Nat
                    xs : Vect n elem
      ----------------------------------------
-      Main.append_rhs : Vect (plus n m) elem
+      Main.append_rhs : Vect (n + m) elem
   \end{lstlisting}
 
   
@@ -754,21 +754,343 @@ main = do word <- getLine
 
 \begin{frame}[fragile]
   \frametitle{Types and automation}
-  \begin{onlyenv}<1>
-    Hey Idris...
-    \begin{lstlisting}[language=Idris]
+
+  We can get Idris to do case split on the first argument...
+
+  \begin{lstlisting}[language=Idris]
     append : Vect n elem -> Vect m elem -> Vect (n + m) elem
     append xs ys = ?append_rhs      
-    \end{lstlisting}
-  \end{onlyenv}
-  \begin{onlyenv}<2>
-    Do a case split on the first argument.
-    \begin{lstlisting}[language=Idris]
+  \end{lstlisting}
+
+  \pause
+  
+  Which leads to a pattern match on constructors, and two holes:
+
+  \begin{lstlisting}[language=Idris]
     append : Vect n elem -> Vect m elem -> Vect (n + m) elem
     append [] ys = ?append_rhs_1
     append (x :: xs) ys = ?append_rhs_2
-    \end{lstlisting}
-  \end{onlyenv}
+  \end{lstlisting}
+
+  \pause
+
+  \begin{lstlisting}[language=Idris]
+- + Main.append_rhs_1 [P]
+ `--               elem : Type
+                      m : Nat
+                     ys : Vect m elem
+     ------------------------------------------
+      Main.append_rhs_1 : Vect (0 + m) elem
+
+- + Main.append_rhs_2 [P]
+ `--               elem : Type
+                      x : elem
+                      m : Nat
+                     ys : Vect m elem
+                    len : Nat
+                     xs : Vect len elem
+     ------------------------------------------------
+      Main.append_rhs_2 : Vect ((S len) + m) elem
+  \end{lstlisting}
 \end{frame}
 
+\begin{frame}[fragile]
+  \frametitle{Types and automation}
+
+  Once broken into cases, Idris can search for values which satisfy the types of the holes. Let's look at the first one...
+
+  \pause
+
+  \begin{lstlisting}[language=Idris]
+    append : Vect n elem -> Vect m elem -> Vect (n + m) elem
+    append [] ys = ?append_rhs_1
+  \end{lstlisting}
+
+  \begin{lstlisting}[language=Idris]
+- + Main.append_rhs_1 [P]
+ `--               elem : Type
+                      m : Nat
+                     ys : Vect m elem
+     ------------------------------------------
+      Main.append_rhs_1 : Vect (0 + m) elem
+  \end{lstlisting}
+
+  \pause
+  
+  Idris actually evaluates the type \texttt{Vect (0 + m) elem}, so this is really...
+
+  \pause
+
+  \begin{lstlisting}[language=Idris]
+- + Main.append_rhs_1 [P]
+ `--               elem : Type
+                      m : Nat
+                     ys : Vect m elem
+     ------------------------------------------
+      Main.append_rhs_1 : Vect m elem
+  \end{lstlisting}
+
+  \pause
+
+  Only \texttt{ys} satisfies this type. Remember \texttt{m} could be any natural.
+\end{frame}
+
+\begin{frame}[fragile]
+  So, Idris can tell that it can use \texttt{ys} for this case, giving us:
+
+  \pause
+
+  \begin{lstlisting}[language=Idris]
+    append : Vect n elem -> Vect m elem -> Vect (n + m) elem
+    append [] ys = ys
+    append (x :: xs) ys = ?append_rhs_2
+  \end{lstlisting}
+
+  \pause
+
+  The second hole is a bit more interesting:
+
+  \begin{lstlisting}[language=Idris]
+    - + Main.append_rhs_2 [P]
+     `--               elem : Type
+                          x : elem
+                          m : Nat
+                         ys : Vect m elem
+                          k : Nat
+                         xs : Vect k elem
+         ----------------------------------------------
+          Main.append_rhs_2 : Vect ((S k) + m) elem
+  \end{lstlisting}
+
+  \pause
+
+  ... Idris can also fill this in.
+
+  \pause
+
+  \begin{lstlisting}[language=Idris]
+    append : Vect n elem -> Vect m elem -> Vect (n + m) elem
+    append [] ys = ys
+    append (x :: xs) ys = x :: append xs ys
+  \end{lstlisting}
+
+  \pause
+
+  This seems bonkers, so let's look at how Idris did this.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Idris the smart and brave}
+
+  To get \lstinline[language=Idris, columns=fixed]{append (x :: xs) ys = x :: append xs ys} Idris realized a couple things:
+
+  \begin{lstlisting}[language=Idris]
+    data Nat : Type where
+      0 : Nat -- Zero
+      S : Nat -> Nat -- Successor (+1)
+
+
+    (+) : Nat -> Nat -> Nat
+    (+) 0 m = m
+    (+) (S k) m = S (k + m)
+  \end{lstlisting}
+
+  \pause
+  Remember our hole:
+
+  \begin{lstlisting}[language=Idris]
+    Main.append_rhs_2 : Vect (( S k ) + m ) elem
+  \end{lstlisting}
+
+  \pause
+  By definition \lstinline[language=Idris, columns=fixed]{(S k) + m = S (k + m)}, so we have:
+
+  \pause
+  \begin{lstlisting}[language=Idris]
+    Main.append_rhs_2 : Vect (S (k + m)) elem
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Idris the smart and brave}
+
+  So we really have this goal:
+
+  \begin{lstlisting}[language=Idris]
+    Main.append_rhs_2 : Vect (S (k + m)) elem
+  \end{lstlisting}
+
+  \pause
+
+  Idris looks at how to construct a \lstinline[language=Idris,columns=fixed]{Vect (S blah) elem}...
+
+  \pause
+
+  \begin{lstlisting}[language=Idris]
+    data Vect : Nat -> Type -> Type where
+      Nil : Vect 0 a
+      (::) : (x : a) -> Vect k a -> Vect (S k) a
+  \end{lstlisting}
+
+  \pause
+  To construct a \lstinline[language=Idris,columns=fixed]{Vect (S blah) elem} we need \texttt{::}!
+
+  \pause
+  \begin{lstlisting}[language=Idris]
+    append : Vect n elem -> Vect m elem -> Vect (n + m) elem
+    append [] ys = ys
+    append (x :: xs) ys = ?elem_to_concat :: ?rest_of_vect
+  \end{lstlisting}
+
+  \pause
+  These are the holes:
+
+  \begin{lstlisting}[language=Idris]
+    Main.elem_to_concat : elem
+
+    Main.rest_of_vect : Vect (plus k m) elem
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Idris the smart and brave}  
+  The first hole is easy for Idris.
+
+  \begin{lstlisting}[language=Idris]
+    - + Main.elem_to_concat [P]
+     `--                 elem : Type
+                            x : elem
+                            m : Nat
+                           ys : Vect m elem
+                            k : Nat
+                           xs : Vect k elem
+         -----------------------------------
+          Main.elem_to_concat : elem
+  \end{lstlisting}
+
+  \pause
+  We need something with the arbitrary type \texttt{elem}. Only \texttt{x} fits!
+
+  \pause
+
+  \begin{lstlisting}[language=Idris]
+    append : Vect n elem -> Vect m elem -> Vect (n + m) elem
+    append [] ys = ys
+    append (x :: xs) ys = x :: ?rest_of_vect
+  \end{lstlisting}
+
+  \pause
+
+  Second hole involves a bit more work...
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Daily dose of recursion}
+
+  \begin{lstlisting}[language=Idris]
+    - + Main.rest_of_vect [P]
+     `--               elem : Type
+                          x : elem
+                          m : Nat
+                         ys : Vect m elem
+                          k : Nat
+                         xs : Vect k elem
+         ------------------------------------------
+          Main.rest_of_vect : Vect (k + m) elem
+  \end{lstlisting}
+
+  \pause
+  Idris knows it can call \texttt{append} recursively with a \lstinline[language=Idris,columns=fixed]{Vect k elem} and a \lstinline[language=Idris,columns=fixed]{Vect m elem} to get a \lstinline[language=Idris,columns=fixed]{Vect (k + m) elem}.
+
+  \pause \\~\\
+
+  Looking at our goal we have such vectors, \texttt{ys} and \texttt{xs}.
+
+  \pause
+  \begin{lstlisting}[language=Idris]
+    append : Vect n elem -> Vect m elem -> Vect (n + m) elem
+    append [] ys = ys
+    append (x :: xs) ys = x :: append xs ys
+  \end{lstlisting}
+
+  \pause
+  Idris wrote this function automatically based on a small spec!
+
+  \pause
+  It's cool that Idris even gets the order correct because of the types!
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Less precise types}
+
+  Doesn't work well with the less precise list type!
+
+  \pause
+  \begin{lstlisting}[language=Idris]
+    append : List elem -> List elem -> List elem
+    append [] ys = ?append_rhs1
+    append (x :: xs) ys = ?append_rhs2
+  \end{lstlisting}
+
+  What do you think will happen when we try the same thing?
+
+  \pause
+  \begin{lstlisting}[language=Idris]
+    append : List elem -> List elem -> List elem
+    append [] ys = []
+    append (x :: xs) ys = []
+  \end{lstlisting}
+
+  Huh... I guess it doesn't realize that append should make a list as long as the inputs combined!
+
+  \pause \\~\\
+  Idris just finds the first possible function. Length isn't encoded in the type to enforce length of output.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{A careful index}
+
+  In Haskell we couldn't guarantee that an index was in range of a list... \pause In Idris we can!
+
+  \pause
+  \begin{lstlisting}[language=Idris]
+     index : Fin len -> Vect len elem -> elem
+     index FZ (x :: xs) = x
+     index (FS n) (_ :: xs) = myIndex n xs 
+   \end{lstlisting}
+
+   \texttt{Fin len} is a type for natural numbers strictly less than \texttt{len}
+
+   \pause
+
+   \begin{lstlisting}[language=Idris]
+     data Fin : Nat -> Type where
+       FZ : Fin (S k)
+       FS : Fin k -> Fin (S k)
+     \end{lstlisting}
+
+   \pause
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{A tale of cautious indexing}
+
+  \begin{lstlisting}[language=Idris]
+    cats : Vect 2 String
+    cats = ["The Panther", "Smoke Smoke"]
+
+    -- "The Panther" : String
+    index 0 cats -- This type checks.
+
+
+    -- (input):1:9:When checking argument prf to function Data.Fin.fromInteger:
+    --         When using 2 as a literal for a Fin 2 
+    --                 2 is not strictly less than 2
+    index 2 cats -- This is out of bounds, so the program won't even compile!
+  \end{lstlisting}
+
+  \pause \\~\\
+
+  \huge{Lots of cool guarantees that we can make with dependent types!}
+\end{frame}
 \end{document}
