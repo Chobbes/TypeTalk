@@ -1093,4 +1093,279 @@ main = do word <- getLine
 
   \huge{Lots of cool guarantees that we can make with dependent types!}
 \end{frame}
+
+\begin{frame}
+  \frametitle{Logic primer}
+
+  What are propositions?
+
+  \begin{itemize}
+  \pause
+  \item A statement: ``the sky is blue'', ``2 + 2 is 4''
+  \pause
+  \item Not necessarily true: ``2 + 2 is 27''
+  \end{itemize}
+
+  \pause
+
+  Logical proofs are used to determine the validity of a proposition.
+
+  \pause \\~\\
+
+  We could show that ``2 + 2 is 27'' is false with a logical proof.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Variables}
+
+  Propositions are often represented by variables, for instance:
+
+  \[
+    p
+  \]
+
+  \pause
+  $p$ is a proposition. It could be anything, really...
+
+  \pause
+  \[
+    p = ``\text{ducks are fantastic}''
+  \]
+
+  \pause
+  And I might have another proposition:
+
+  \[
+    q = ``\text{ducks are truly the worst}''
+  \]
+
+  \pause
+  We can build up more complicated propositions with logical connectives. In this case we might have:
+
+  \[
+    p \rightarrow \neg q
+  \]
+
+  Which means that if $p$ is true, then $q$ is not true. We'll see more of this shortly.
+\end{frame}
+
+\begin{frame}
+  \frametitle{More logic}
+
+  We've mostly been using plain English to convey these propositions, but often they'll be more mathematical statements, such as:
+
+  \[\forall n \in \mathrm{N}, \exists m \in \mathrm{N} \text{ such that } m > n\]
+
+  \pause \\~\\
+
+  Propositions...
+
+  \begin{itemize}
+  \item Are built up from a set of axioms
+    \begin{itemize}
+    \item Just rules which describe your mathematical objects
+    \end{itemize}
+  \pause
+  \item Can be combined with logical connectives.
+  \end{itemize}
+
+  \pause \\~\\
+
+  Logic is a sort of metalanguage which describes how you can make judgements about your mathematical objects.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Logical connectives}
+
+  In a logical system you might have these logical connectives:
+
+  \begin{itemize}
+  \pause
+  \item Implication:
+    \begin{itemize}
+    \item $p \rightarrow q$, meaning ``if $p$ is true, then $q$ must be true.''
+    \end{itemize}
+  \pause
+  \item Conjunction:
+    \begin{itemize}
+    \item $p \wedge q$, meaning ``both $p$ and $q$ are true.''
+    \end{itemize}
+  \pause
+  \item Disjunction:
+    \begin{itemize}
+    \item $p \vee q$, meaning ``at least one of $p$ or $q$ is true.''
+    \end{itemize}
+  \pause
+  \item Negation:
+    \begin{itemize}
+    \item $\neg p$, meaning ``not $p$'', ``$p$ is false.''
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Quantification}
+  You might also have quantifiers:
+
+  \begin{itemize}
+  \pause
+  \item Universal quantification:
+    \begin{itemize}
+    \item $\forall x \in S, p(x)$, meaning ``for every $x$ (in $S$), $p(x)$ is true.''
+    \end{itemize}
+  \pause
+  \item Existential quantification:
+    \begin{itemize}
+    \item $\exists x \in S, p(x)$, meaning ``there's at least on $x$ (in $S$), which makes $p(x)$ true.''
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Proof rules}
+
+  You also have some rules for how you can combine these things to form proofs. E.g., Modus ponens
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Curry-Howard Isomorphism: Propositions as Types!}
+
+  Things get interesting when you start thinking about types as propositions...
+
+  \pause
+
+  \[p \rightarrow q\]
+
+  \pause
+  This looks an awful lot like...
+
+  \begin{lstlisting}[language=Idris]
+    hmmm1 : p -> q
+  \end{lstlisting}
+
+  \pause \\~\\
+  Similarly...
+
+  \[p \wedge q\]
+
+  \pause
+  Is kind of similar to:
+
+  \begin{lstlisting}[language=Idris]
+    hmmm2 : (p, q)
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Curry-Howard Isomorphism: Propositions as Types!}
+
+  Conjunction elimination corresponds to destructing a product...
+  \begin{lstlisting}[language=Idris]
+    -- P /\ Q -> P
+    fst : (p, q) -> p
+    fst (a, b) = a
+
+    -- P /\ Q -> Q
+    snd : (p, q) -> q
+    snd (a, b) = b
+  \end{lstlisting}
+
+  \pause
+  Conjuction introduction corresponds to constructing a product...
+  \begin{lstlisting}[language=Idris]
+    -- P -> Q -> (P, Q)
+    and : p -> q -> (p, q)
+    and a b = (a, b)
+  \end{lstlisting}
+
+  \pause \\~\\
+  Similar things for other logical connectives. E.g., $p \vee q$ corresponds to a sum type \texttt{Either p q}.
+
+  \pause \\~\\
+  $\neg p$ corresponds to \texttt{p -> Void} where \texttt{Void} is an uninhabited type.
+
+  \pause \\~\\
+  Dependent types are needed for quantifiers.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Valuable proofs}
+  If types are propositions, then what are the vaues?
+
+  \pause \\~\\
+  Well, they're a sort of ``existence proof'' of a proposition.
+
+  \pause
+  \begin{lstlisting}[language=Idris]
+    const : p -> q -> p
+    const a b = a
+  \end{lstlisting}
+
+  \pause
+  The value \texttt{const} can be seen as a proof of the proposition (type) \texttt{p -> q -> p}... This is what \texttt{const} says:
+
+  \begin{itemize}
+  \pause
+  \item given a proof of \texttt{p}, \texttt{a}
+  \pause
+  \item and a proof of \texttt{q}, \texttt{b}
+  \pause
+  \item I can provide \texttt{a} as a proof of \texttt{p}
+  \end{itemize}
+
+  \pause \\~\\
+  Which oddly enough makes a lot of sense as proof!
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Invaluable proofs}
+
+  Type checker can prevent bogus proofs! Stops us from proving false propositions!
+
+  \pause
+  \begin{lstlisting}[language=Idris]
+    bogus : p -> q
+    bogus p = -- What can I put here that would type check? :(
+  \end{lstlisting}
+
+  \pause
+  Can't find a value of type \texttt{q}, since we only have a value of type \texttt{p}!
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Proofs in practice}
+
+  Idris has a type for equality between two things.
+
+  \pause
+  \begin{lstlisting}[language=Idris]
+    equality_good : 2+3 = 5 -- Equality as a proposition in the type!
+    equality_good = Refl
+
+    -- This fails to type check
+    equality_bad : 2+3 = 7
+    equality_bad = Refl
+  \end{lstlisting}
+
+  \pause
+  Equality has only one constructor, \texttt{Refl}. This is roughly defined as:
+
+  \pause
+  \begin{lstlisting}[language=Idris]
+    data (=) : a -> b -> Type where
+      Refl : x = x
+  \end{lstlisting}
+
+  \pause \\~\\
+
+  Looks a little obtuse... But if we need a \texttt{something = blah} type, we use \texttt{Refl}.
+
+  \pause \\~\\
+
+  Idris will try to determine if they are equal due to some definition in its database.
+
+  \pause
+  E.g., \texttt{2+3 = 5}, since Idris can evaluate \texttt{2+3} to \texttt{5}, and see that they are identical.
+\end{frame}
+
 \end{document}
