@@ -619,14 +619,14 @@ this is going to involve a little help from types.
 
   #+BEGIN_SRC idris
     - + Main.append_rhs_1 [P]
-     `--               elem : Type
+     `__               elem : Type
                           m : Nat
                          ys : Vect m elem
          ------------------------------------------
           Main.append_rhs_1 : Vect (0 + m) elem
 
     - + Main.append_rhs_2 [P]
-     `--               elem : Type
+     `__               elem : Type
                           x : elem
                           m : Nat
                          ys : Vect m elem
@@ -656,7 +656,7 @@ this is going to involve a little help from types.
 
   #+BEGIN_SRC idris
     - + Main.append_rhs_2 [P]
-     `--               elem : Type
+     `__               elem : Type
                           x : elem
                           m : Nat
                          ys : Vect m elem
@@ -716,7 +716,7 @@ this is going to involve a little help from types.
 
   #+BEGIN_SRC idris
     - + Main.elem_to_concat [P]
-     `--                 elem : Type
+     `__                 elem : Type
                             x : elem
                             m : Nat
                            ys : Vect m elem
@@ -726,7 +726,7 @@ this is going to involve a little help from types.
           Main.elem_to_concat : elem
 
     - + Main.rest_of_vect [P]
-     `--               elem : Type
+     `__               elem : Type
                           x : elem
                           m : Nat
                          ys : Vect m elem
@@ -995,7 +995,7 @@ this is going to involve a little help from types.
 
   ~cong~ stands for congruence, and has a type which represents the
   proposition that, if you are given a function ~f~, and you know that
-  some ~x~ and ~y~ are equal, then ~f x = f y~ as well.
+  some ~x~ and ~y~ are equal, then ~f x = f y~.
 
   This might seem really odd and scary right now, because you have
   equals signs in your types. But remember, types are propositions of
@@ -1007,7 +1007,7 @@ this is going to involve a little help from types.
 
   #+BEGIN_SRC idris
      - + Main.cong_rhs [P]
-    `--              b : Type
+    `__              b : Type
                      a : Type
                      x : a
                      f : a -> b
@@ -1033,7 +1033,7 @@ this is going to involve a little help from types.
 
   #+BEGIN_SRC idris
     - + Main.cong_rhs_1 [P]
-     `--                b : Type
+     `__                b : Type
                         a : Type
                         x : a
                         f : a -> b
@@ -1136,13 +1136,13 @@ this is going to involve a little help from types.
 
    #+BEGIN_SRC idris
      - + Main.plus_assoc_rhs_1 [P]
-      `--                      y : Nat
+      `__                      y : Nat
                                z : Nat
           ---------------------------------------------------------------
            Main.plus_assoc_rhs_1 : 0 + (y + z) = (0 + y) + z
 
      - + Main.plus_assoc_rhs_2 [P]
-      `--                      k : Nat
+      `__                      k : Nat
                                y : Nat
                                z : Nat
           -----------------------------------------------------------------------
@@ -1158,7 +1158,7 @@ this is going to involve a little help from types.
 
    #+BEGIN_SRC idris
      - + Main.plus_assoc_rhs_1 [P]
-      `--                      y : Nat
+      `__                      y : Nat
                                z : Nat
           ---------------------------------------------------------------
            Main.plus_assoc_rhs_1 : y + z = y + z
@@ -1176,7 +1176,7 @@ this is going to involve a little help from types.
 
    #+BEGIN_SRC idris
      - + Main.plus_assoc_rhs_2 [P]
-      `--                      k : Nat
+      `__                      k : Nat
                                y : Nat
                                z : Nat
           -----------------------------------------------------------------------
@@ -1188,7 +1188,7 @@ this is going to involve a little help from types.
 
    #+BEGIN_SRC idris
      - + Main.plus_assoc_rhs_2 [P]
-      `--                      k : Nat
+      `__                      k : Nat
                                y : Nat
                                z : Nat
           -----------------------------------------------------------------------

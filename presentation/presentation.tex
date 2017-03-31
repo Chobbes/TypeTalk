@@ -740,7 +740,7 @@ main = do word <- getLine
 
   \begin{lstlisting}[language=Idris]
 - + Main.append_rhs [P]
- `--             elem : Type
+ `__             elem : Type
                     m : Nat
                    ys : Vect m elem
                     n : Nat
@@ -776,14 +776,14 @@ main = do word <- getLine
 
   \begin{lstlisting}[language=Idris]
 - + Main.append_rhs_1 [P]
- `--               elem : Type
+ `__               elem : Type
                       m : Nat
                      ys : Vect m elem
      ------------------------------------------
       Main.append_rhs_1 : Vect (0 + m) elem
 
 - + Main.append_rhs_2 [P]
- `--               elem : Type
+ `__               elem : Type
                       x : elem
                       m : Nat
                      ys : Vect m elem
@@ -808,7 +808,7 @@ main = do word <- getLine
 
   \begin{lstlisting}[language=Idris]
 - + Main.append_rhs_1 [P]
- `--               elem : Type
+ `__               elem : Type
                       m : Nat
                      ys : Vect m elem
      ------------------------------------------
@@ -823,7 +823,7 @@ main = do word <- getLine
 
   \begin{lstlisting}[language=Idris]
 - + Main.append_rhs_1 [P]
- `--               elem : Type
+ `__               elem : Type
                       m : Nat
                      ys : Vect m elem
      ------------------------------------------
@@ -852,7 +852,7 @@ main = do word <- getLine
 
   \begin{lstlisting}[language=Idris]
     - + Main.append_rhs_2 [P]
-     `--               elem : Type
+     `__               elem : Type
                           x : elem
                           m : Nat
                          ys : Vect m elem
@@ -958,7 +958,7 @@ main = do word <- getLine
 
   \begin{lstlisting}[language=Idris]
     - + Main.elem_to_concat [P]
-     `--                 elem : Type
+     `__                 elem : Type
                             x : elem
                             m : Nat
                            ys : Vect m elem
@@ -989,7 +989,7 @@ main = do word <- getLine
 
   \begin{lstlisting}[language=Idris]
     - + Main.rest_of_vect [P]
-     `--               elem : Type
+     `__               elem : Type
                           x : elem
                           m : Nat
                          ys : Vect m elem
@@ -1000,7 +1000,10 @@ main = do word <- getLine
   \end{lstlisting}
 
   \pause
-  Idris knows it can call \texttt{append} recursively with a \lstinline[language=Idris,columns=fixed]{Vect k elem} and a \lstinline[language=Idris,columns=fixed]{Vect m elem} to get a \lstinline[language=Idris,columns=fixed]{Vect (k + m) elem}.
+  Idris knows it can call \texttt{append} recursively with a
+\lstinline[language=Idris,columns=fixed]{Vect k elem} and a
+\lstinline[language=Idris,columns=fixed]{Vect m elem} to get a
+\lstinline[language=Idris,columns=fixed]{Vect (k + m) elem}.
 
   \pause \\~\\
 
@@ -1362,10 +1365,338 @@ main = do word <- getLine
 
   \pause \\~\\
 
-  Idris will try to determine if they are equal due to some definition in its database.
+  Idris will try to determine if they are equal from the definitions it knows about.
 
   \pause
   E.g., \texttt{2+3 = 5}, since Idris can evaluate \texttt{2+3} to \texttt{5}, and see that they are identical.
 \end{frame}
 
+\begin{frame}[fragile]
+  \frametitle{Congruency}
+
+  \begin{lstlisting}[language=Idris]
+    cong : (f : a -> b) -> x = y -> f x = f y
+    cong f prf = ?cong_rhs
+  \end{lstlisting}
+
+  \pause
+  Seems a bit scary! Equality in the types!
+
+  \pause \\~\\
+  Remember that this just means we need to construct a type using
+  \texttt{Refl}. Idris just needs to show that the left and right hand
+  side are equal.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Congruency}
+
+  This is our goal:
+
+  \begin{lstlisting}[language=Idris]
+     - + Main.cong_rhs [P]
+    `__              b : Type
+                     a : Type
+                     x : a
+                     f : a -> b
+                     y : a
+                   prf : x = y
+        ---------------------------
+         Main.cong_rhs : f x = f y
+  \end{lstlisting}
+
+  \pause
+  We can get some help by pattern matching!
+
+  \begin{lstlisting}[language=Idris]
+    cong : (f : a -> b) -> x = y -> f x = f y
+    cong f Refl = ?cong_rhs_1
+  \end{lstlisting}
+
+  \pause
+  Looks unimpressive, but it changed our goal:
+
+  \begin{lstlisting}[language=Idris]
+    - + Main.cong_rhs_1 [P]
+     `__                b : Type
+                        a : Type
+                        x : a
+                        f : a -> b
+         -----------------------------
+          Main.cong_rhs_1 : f x = f x
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Congruency}
+
+  \texttt{Refl} lets us construct equalities.
+
+  \begin{lstlisting}[language=Idris]
+    Refl : x = x
+
+    -- So, if we just replace the general "x" above with our "f x" we
+    -- would get...
+    Refl : f x = f x
+  \end{lstlisting}
+
+  \pause
+  \texttt{Refl} uses implicit arguments, can infer from context:
+
+  \begin{lstlisting}[language=Idris]
+    cong : (f : a -> b) -> x = y -> f x = f y
+    cong f Refl = Refl
+  \end{lstlisting}
+
+  \pause
+  Can also provide the argument explicitly:
+
+  \begin{lstlisting}[language=Idris]
+    cong : (f : a -> b) -> x = y -> f x = f y
+    cong f (Refl {x}) = Refl {x = f x}
+  \end{lstlisting}
+
+  \pause
+  Bit confusing because \texttt{x} is in both places, but \texttt{x}
+  in the definition of \texttt{Refl} is in a different scope, and we
+  substitute \texttt{f x} for \texttt{x}.
+
+  \pause \\~\\
+
+  This concludes the proof of \texttt{cong}!
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Slightly more complicated proofs}
+
+  Let's prove the associativity of addition on natural numbers!
+
+  \pause \\~\\
+
+  Here's our nice unary representation of natural numbers:
+
+  \begin{lstlisting}[language=Idris]
+     data Nat : Type where
+       0 : Nat
+       S : Nat -> Nat -- Successor, +1
+
+     -- 0 = 0
+     -- S 0 = 1
+     -- S (S 0) = 2
+     -- etc...
+   \end{lstlisting}
+   
+   \pause \\~\\
+
+   Addition looks like this:
+
+   \begin{lstlisting}[language=Idris]
+     (+) : Nat -> Nat -> Nat
+     (+) 0 y = y
+     (+) (S x) y = S (x + y)
+   \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Associativity}
+
+  \begin{lstlisting}[language=Idris]
+     plus_assoc : (x, y, z : Nat) -> x + (y + z) = (x + y) + z
+     plus_assoc x y z = ?plus_assoc_rhs
+  \end{lstlisting}
+
+  \pause
+  Case split on \texttt{x}...
+  
+  \begin{lstlisting}[language=Idris]
+    plus_assoc : (x, y, z : Nat) -> x + (y + z) = (x + y) + z
+    plus_assoc Z y z = ?plus_assoc_rhs_1
+    plus_assoc (S k) y z = ?plus_assoc_rhs_2
+  \end{lstlisting}
+
+  \pause
+  Gives us some interesting holes...
+
+  \begin{lstlisting}[language=Idris]
+     - + Main.plus_assoc_rhs_1 [P]
+      `__                      y : Nat
+                               z : Nat
+          ---------------------------------------------------------------
+           Main.plus_assoc_rhs_1 : 0 + (y + z) = (0 + y) + z
+
+     - + Main.plus_assoc_rhs_2 [P]
+      `__                      k : Nat
+                               y : Nat
+                               z : Nat
+          -----------------------------------------------------------------------
+           Main.plus_assoc_rhs_2 : (S k) + (y + z) = ((S k) + y) + z
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{First case...}
+
+  We have:
+
+  \begin{lstlisting}[language=Idris]
+     - + Main.plus_assoc_rhs_1 [P]
+      `__                      y : Nat
+                               z : Nat
+          ---------------------------------------------------------------
+           Main.plus_assoc_rhs_1 : 0 + (y + z) = (0 + y) + z
+  \end{lstlisting}
+
+  \pause
+  Idris will evaluate expressions in an equality type when we use
+  \texttt{Refl}, so this hole is really more like:
+
+  \begin{lstlisting}[language=Idris]
+     - + Main.plus_assoc_rhs_1 [P]
+      `__                      y : Nat
+                               z : Nat
+          ---------------------------------------------------------------
+           Main.plus_assoc_rhs_1 : y + z = y + z
+  \end{lstlisting}
+
+  \pause
+  Which is just satisfied with reflexivity...
+
+  \begin{lstlisting}[language=Idris]
+     plus_assoc : (x, y, z : Nat) -> x + (y + z) = (x + y) + z
+     plus_assoc Z y z = Refl
+     plus_assoc (S k) y z = ?plus_assoc_rhs_2
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Second case...}
+
+  Here's our goal:
+
+  \begin{lstlisting}[language=Idris]
+     - + Main.plus_assoc_rhs_2 [P]
+      `__                      k : Nat
+                               y : Nat
+                               z : Nat
+          ------------------------------------------------------------
+           Main.plus_assoc_rhs_2 : (S k) + (y + z) = ((S k) + y) + z
+  \end{lstlisting}
+
+  \pause
+  Idris can evaluate this some to simplify as well.
+
+  \begin{lstlisting}[language=Idris]
+     - + Main.plus_assoc_rhs_2 [P]
+      `__                      k : Nat
+                               y : Nat
+                               z : Nat
+          ------------------------------------------------------------
+           Main.plus_assoc_rhs_2 : S (k + (y + z)) = S ((k + y) + z)
+  \end{lstlisting}
+
+  It loooks like we need to prove associativity again...
+
+  \pause
+  \begin{lstlisting}[language=Idris]
+    k + (y + z) = (k + y) + z
+  \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Recursion is induction!}
+
+  Idris knows about recursion, so we can actually call
+  \texttt{plus\_assoc} on \texttt{k}, \texttt{y}, and \texttt{z} to get
+  something with type...
+
+  \begin{lstlisting}[language=Idris]
+    attempt : (k y z : Nat) -> k + (y + z) = (k + y) + z
+    attempt k y z = plus_assoc k y z
+  \end{lstlisting}
+
+  \pause \\~\\
+
+  So, now we just need to add \texttt{S} to both sides of this... Hmmm...
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Enter cong}
+
+  This is what we use \texttt{cong} for, if you remember...
+
+  \begin{lstlisting}[language=Idris]
+     cong : (f : a -> b) -> x = y -> f x = f y
+     cong f (Refl {x}) = Refl {x = f x}
+   \end{lstlisting}
+
+   \pause
+   If we give \texttt{cong} a function, and an equality type, it will apply the function to both sides!
+
+   \pause
+   \begin{lstlisting}[language=Idris]
+     plus_assoc : (x, y, z : Nat) -> x + (y + z) = (x + y) + z
+     plus_assoc Z y z = Refl
+     plus_assoc (S k) y z = cong S (plus_assoc k y z)
+   \end{lstlisting}
+
+   \pause \\~\\
+   This completes the proof!
+
+   \pause
+
+   Neat how applying a theorem is just applying a function. Also neat
+   how recursion and induction are really just the same thing.
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Tactics}
+
+  Can use a different meta-language like Coq's tactics to aid proofs...
+
+  \pause
+  \begin{lstlisting}[language=Coq]
+    Inductive nat : Type :=
+      | O : nat
+      | S : nat -> nat.
+
+
+    Fixpoint plus (n m : nat) : nat :=
+      match n with
+        | O => m
+        | S n' => S (plus n' m)
+      end.
+
+
+    Theorem plus_assoc : forall (x y z : nat), plus x (plus y z) = plus (plus x y) z.
+    Proof.
+      intros x y z. induction x as [| k].
+      - reflexivity.
+      - simpl. (* Simplify with evaluation *)
+        rewrite IHk. (* Use induction hypothesis to rewrite terms *)
+        reflexivity.
+    Qed.
+  \end{lstlisting}
+
+  \pause
+
+  Can allow for very succinct and easy proof development, since meta-language can perform large automated steps!
+\end{frame}
+
+\begin{frame}
+  \frametitle{Conclusion! Questions?}
+
+  \huge{Whirlwind introduction, so you probably have many!}
+\end{frame}
+
+\begin{frame}
+  \frametitle{References}
+
+  \begin{itemize}
+  \item Propositions as Types
+  \item Type-Driven Development
+  \item Software Foundations
+  \end{itemize}
+
+  These are all good resources! You should look at them!
+\end{frame}
 \end{document}
