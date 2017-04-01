@@ -5,15 +5,14 @@ Hi all!
 
 My name is Calvin and I'm here to talk to you about a couple of things
 -- mostly types, and how they can help you write correct programs! I
-have a couple bullet points here, to summarize what I want to talk
+have a couple bullet points to summarize what I want to talk
 about:
 
 1) You should care, and you NEED to care about your software.
-   Computers are undeniably integral to *every* aspect of our lives.
-   Every day ever larger portions of our lives are controlled by
-   computers. Whether it's a voting machine, banking software, or a
-   component of a vehicle, there's always a programmer behind it
-   somewhere.
+   Computers are integral to *every* aspect of our lives, an their
+   influence grows daily. Whether it's a voting machine, banking
+   software, or a component of a vehicle, there's always a programmer
+   behind it somewhere.
 
    This should terrify you if you have ever programmed before.
 
@@ -43,11 +42,11 @@ You think that this is a normal, and necessary thing:
 
 That's bad. Runtime exceptions don't actually /have/ to exist, and it
 can be very bad if our pacemaker segfaults. So maybe we should avoid
-these problems in the first place! I'll talk a little about what we
-can do to avoid these problems. Later on in the talk we'll dip a
-little into how you can guarantee that the logic in your program is
-correct too, and not just that it does not explode at runtime. All of
-this is going to involve a little help from types.
+these problems in the first place! I'll talk a bit about what we can
+do to avoid these problems. Later on in the talk we'll dip a little
+into how you can guarantee that the logic in your program is correct
+too, and not just that it does not explode at runtime. All of this is
+going to involve a little help from types.
 
 * What is a type?
 
@@ -68,10 +67,12 @@ this is going to involve a little help from types.
 
   This can really help us write programs that make sense! And these
   types are excellent documentation which the compiler can ensure is
-  accurate! A type checker can be used to reject programs which
-  consist of nonsense like $357^{circles}$, and in fact types can
-  eliminate entire classes of errors if designed properly. No more
-  null reference exceptions!
+  accurate!
+
+  A type checker can be used to reject programs which consist of
+  nonsense like $357^{circles}$, and in fact types can eliminate
+  entire classes of errors if designed properly. No more null
+  reference exceptions!
 
 * The types you may have seen.
 
