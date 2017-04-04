@@ -51,8 +51,16 @@ showstringspaces=false}
   Types! This presentation hopes to address the following:
 
   \begin{itemize}
-  \item How types make things easier to write.
   \item How types can help you write correct software.
+    \begin{itemize}
+    \item This is important when \emph{EVERYTHING} runs software.
+    \item Good type systems can make this less horrifying!
+    \end{itemize}
+  \item How types make things easier to write in general.
+    \begin{itemize}
+    \item Compiler can automate a lot more.
+    \item Compiler can catch many simple issues.
+    \end{itemize}
   \end{itemize}
 
   \pause
@@ -206,11 +214,11 @@ showstringspaces=false}
 
    \begin{itemize}
    \pause
+   \item Very verbose. Lots of additional syntactic cruft.
+   \pause
    \item Can see what functions accept and return!
    \pause
    \item Null references... :c
-   \pause
-   \item Very verbose. Lots of additional syntactic cruft.
    \end{itemize}
 
    \pause
@@ -237,6 +245,12 @@ showstringspaces=false}
     \item Stop us from making mistakes.
     \end{itemize}
     \pause
+  \item Allow us to make better guarantees.
+    \begin{itemize}
+    \item ``Function does not alter global state''
+    \item ``Function does not read from disk''
+    \end{itemize}
+    \pause
   \item Not too much verbosity.
     \begin{itemize}
     \item Nice, clean syntax!
@@ -248,6 +262,7 @@ showstringspaces=false}
 
 \begin{frame}[fragile]
   \frametitle{Introducing Haskell!}
+  \pause
   \begin{lstlisting}[frame=single, language=Java, breaklines=true, basicstyle=\ttfamily\tiny]
      def my_sort(xs):
          if xs == []:

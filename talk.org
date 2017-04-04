@@ -4,35 +4,37 @@
 Hi all!
 
 My name is Calvin and I'm here to talk to you about a couple of things
--- mostly types, and how they can help you write correct programs! I
-have a couple bullet points to summarize what I want to talk
-about:
+-- mostly types, and how they can help you write correct programs!
+This talk aims to address some of the following:
 
-1) You should care, and you NEED to care about your software.
-   Computers are integral to *every* aspect of our lives, an their
-   influence grows daily. Whether it's a voting machine, banking
-   software, or a component of a vehicle, there's always a programmer
-   behind it somewhere.
 
-   This should terrify you if you have ever programmed before.
+1) Firstly:
+   You should care, and you NEED to care about your software.
+   Computers are integral to nearly *every* aspect of our lives, and
+   their influence is growing daily. Whether it's a voting machine,
+   banking software, or a component of a vehicle, there's always a
+   programmer behind it somewhere.
 
-   An incorrect program may just be annoying and lose a business a
-   customer, or an incorrect program could kill somebody if it's
-   something vital, like software running a pacemaker.
+   And this fact should probably terrify you if you have ever
+   programmed before.
+
+   An incorrect program may be annoying and lose a business a
+   customer, or it could be life threatening if it's something vital,
+   like the software for a pacemaker.
 
    We need to be careful!
+   
+   Types can help us be careful, and are a good way to deal with how
+   scary this is!
 
-2) Types are a good way to help you with how scary the first point is!
-
-3) Not only are types great for writing correct programs, but they can
-   make it a lot easier to write programs in the first place! They help
-   the compiler help you!
+2) Secondly, not only are types great for writing correct programs, but they can
+   make it a lot easier to write programs in the first place! They
+   help the compiler help you!
 
 This is going to be somewhat of a whirlwind introduction to the world
 of types, so if you get lost along the way that's okay. Just let me
-know and hopefully I can clarify things along the way, and if I can't
-do that in the allotted time, don't fret! Talk to me after the fact!
-Sometimes it takes a while to grok mathy stuff!
+know and hopefully I can clarify things. If all else fails talk to me
+after the fact!  Sometimes it takes a while to grok mathy stuff!
 
 * What are we trying to solve?
 
@@ -42,11 +44,14 @@ You think that this is a normal, and necessary thing:
 
 That's bad. Runtime exceptions don't actually /have/ to exist, and it
 can be very bad if our pacemaker segfaults. So maybe we should avoid
-these problems in the first place! I'll talk a bit about what we can
-do to avoid these problems. Later on in the talk we'll dip a little
-into how you can guarantee that the logic in your program is correct
-too, and not just that it does not explode at runtime. All of this is
-going to involve a little help from types.
+these problems in the first place!
+
+I'll talk a bit about what we can do to avoid these problems. Later
+we'll look a little into how you can guarantee that the logic in your
+program is correct too, and not just that it does not explode at
+runtime.
+
+All of this is going to involve a little help from types.
 
 * What is a type?
 
@@ -113,11 +118,13 @@ going to involve a little help from types.
    really damn hard.
 
    In a large code base it's difficult to even know what you should
-   pass to a function. Should it take a list, or a set? Should it take
-   an int, or a float? This factorial function only works with ints (a
-   non-integer number will never trigger the base case), but you might
-   not realize you're calling it with floats until it's too late! Can
-   you simply pass the result of another function to this one, or
+   pass to a function. Should it take a list, or a set, or an integer?
+
+   This factorial function only works with ints (a non-integer number
+   will never trigger the base case), but you might not realize you're
+   calling it with floats until it's too late!
+
+   Can you simply pass the result of another function to this one, or
    might that function return None, which this factorial function
    can't handle?  You can't know for sure until you read what that
    other function does, and what every function that function calls
