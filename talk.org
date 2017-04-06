@@ -368,16 +368,16 @@ All of this is going to involve a little help from types.
    yield Nothing.
 
    #+BEGIN_SRC haskell
-     -- Find out where a value is in a function.
-     getIndex :: Eq a => a -> [a] -> Maybe Integer
-     getIndex = getIndexAcc 0
+     -- Find out where a value is in a list.
+     whichIndex :: Eq a => a -> [a] -> Maybe Integer
+     whichIndex = whichIndexAcc 0
 
      -- Helper function that remembers our position in the list.
-     getIndexAcc :: Eq a => Integer -> a -> [a] -> Maybe Integer
-     getIndexAcc pos value [] = Nothing
-     getIndexAcc pos value (x::xs) = if x == value
+     whichIndexAcc :: Eq a => Integer -> a -> [a] -> Maybe Integer
+     whichIndexAcc pos value [] = Nothing
+     whichIndexAcc pos value (x::xs) = if x == value
                                         then Just pos
-                                        else getIndexAcc (pos+1) xs
+                                        else whichIndexAcc (pos+1) xs
 
 
      -- A dictionary of all the important words.
@@ -387,7 +387,7 @@ All of this is going to involve a little help from types.
 
      main :: IO ()
      main = do entry <- getLine
-               case getIndex entry dictionary of
+               case whichIndex entry dictionary of
                     (Just pos) => putStrLn "Your entry is at position " ++ show pos ++ " in the dictionary."
                     Nothing => putStrLn "Your entry does not appear in the dictionary."
    #+END_SRC
@@ -875,12 +875,20 @@ All of this is going to involve a little help from types.
   - Existential quantification
     + $\exists x, P(x)$, meaning we can find an ~x~ that we can substitute into ~P(x)~ to make the proposition hold.
 
-** Inference rules
+** Inference / proof rules
    There are some basic axioms for how you can work with these
-   propositions. These are just rules that "make sense". I have
-   attached the axioms for propositional logic here.
+   propositions. These are just rules that "make sense". Such as modus ponens
 
-   # Axiom table
+  \[p \rightarrow q, p \vdash q\]
+
+  Or conjunction elimination
+
+  \[p \wedge q \vdash p\]
+  \[p \wedge q \vdash q\]
+
+  Or conjunction introduction
+
+  \[p, q \vdash p \wedge q\]
 
 * Curry-Howard Isomorphism
 

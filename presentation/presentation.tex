@@ -395,10 +395,8 @@ showstringspaces=false}
   \pause
 
   \begin{itemize}
-  \item Not just null!
-  \pause
+  \item Better than null!
   \item Type checker can tell us when we need to handle null.
-  \pause
   \item Compile time errors if we don't handle null!
   \end{itemize}
 \end{frame}
@@ -407,16 +405,16 @@ showstringspaces=false}
   \frametitle{Maybe examples}
 
   \begin{lstlisting}[frame=single, language=Haskell, breaklines=true, basicstyle=\ttfamily\tiny]
-     -- Find out where a value is in a function.
-     getIndex :: Eq a => a -> [a] -> Maybe Integer
-     getIndex = getIndexAcc 0
+     -- Find out where a value is in a list.
+     whichIndex :: Eq a => a -> [a] -> Maybe Integer
+     whichIndex = whichIndexAcc 0
 
      -- Helper function that remembers our position in the list.
-     getIndexAcc :: Eq a => Integer -> a -> [a] -> Maybe Integer
-     getIndexAcc pos value [] = Nothing
-     getIndexAcc pos value (x::xs) = if x == value
+     whichIndexAcc :: Eq a => Integer -> a -> [a] -> Maybe Integer
+     whichIndexAcc pos value [] = Nothing
+     whichIndexAcc pos value (x::xs) = if x == value
                                         then Just pos
-                                        else getIndexAcc (pos+1) xs
+                                        else whichIndexAcc (pos+1) xs
 
      -- A dictionary of all the important words.
      dictionary :: [String]
@@ -424,17 +422,14 @@ showstringspaces=false}
 
      main :: IO ()
      main = do entry <- getLine
-               case getIndex entry dictionary of
+               case whichIndex entry dictionary of
                     (Just pos) => putStrLn "Your entry is at position " ++ show pos ++ " in the dictionary."
                     Nothing => putStrLn "Your entry does not appear in the dictionary."
   \end{lstlisting}
 
   \begin{itemize}
-  \pause
-  \item You know \texttt{getIndex} can yield a ``null'' value (\textt{Nothing}). Just from type.
-  \pause
+  \item You know \texttt{whichIndex} can yield a ``null'' value (\textt{Nothing}). Just from type.
   \item Could also be a \texttt{Just <Integer>}, such as \texttt{Just 3}.
-  \pause
   \item You have to explicitly unwrap these values (see \textt{main}) to get at the possible value!
   \end{itemize}
 \end{frame}
@@ -457,7 +452,7 @@ synonyms = ["meows", "bread oreos", "sweet nectar"]
 moreSynonyms :: [String]
 moreSynonyms = ["floofs", "subs", "hot coco"]
 
-
+-- Get value at index, Nothing if out of range.
 getIndex :: Integer -> [a] -> Maybe a
 getIndex _ [] = Nothing
 getIndex 0 (x:xs) = Just x
@@ -469,7 +464,7 @@ getIndex n (_:xs) = getIndex (n-1) xs
 \end{frame}
 
 \begin{frame}[fragile]
-  Seems tedious? It's not! Good syntax makes this easy!
+  ``Do'' notation frees us from tedium!
 
   \begin{lstlisting}[frame=single, language=Haskell, breaklines=true, basicstyle=\ttfamily\tiny]
 lookupSynonyms :: String -> Maybe (String, String)
@@ -542,8 +537,6 @@ main = do word <- getLine
 
   \begin{itemize}
   \pause
-  \item \texttt{()} is ``void'' --- no return value.
-  \pause
   \item \texttt{IO} means a function performs input / output.
     \begin{itemize}
     \pause
@@ -553,6 +546,9 @@ main = do word <- getLine
     \pause
     \item etc...
     \end{itemize}
+  \pause
+  \item \texttt{()} is ``void'' --- no return value.
+  \pause
   \item No escaping \texttt{IO}. Taints anything using it, so you know if something does input / output.
   \pause
   \item Can help avoid unexpected behaviour, similar to global state changing a functions behaviour.
@@ -650,9 +646,7 @@ main = do word <- getLine
   Would be nice to encode into the type of \texttt{mySort} that...
   
   \begin{itemize}
-  \pause
   \item Output list must be in ascending order.
-  \pause
   \item Output list must contain the same values as the input list.
   \end{itemize}
 
@@ -845,9 +839,8 @@ main = do word <- getLine
 \end{frame}
 
 \begin{frame}[fragile]
+  \frametitle{Types and automation}
   So, Idris can tell that it can use \texttt{ys} for this case, giving us:
-
-  \pause
 
   \begin{lstlisting}[language=Idris]
     append : Vect n elem -> Vect m elem -> Vect (n + m) elem
@@ -929,8 +922,6 @@ main = do word <- getLine
     Main.append_rhs_2 : Vect (S (k + m)) elem
   \end{lstlisting}
 
-  \pause
-
   Idris looks at how to construct a \lstinline[language=Idris,columns=fixed]{Vect (S blah) elem}...
 
   \pause
@@ -944,7 +935,6 @@ main = do word <- getLine
   \pause
   To construct a \lstinline[language=Idris,columns=fixed]{Vect (S blah) elem} we need \texttt{::}!
 
-  \pause
   \begin{lstlisting}[language=Idris]
     append : Vect n elem -> Vect m elem -> Vect (n + m) elem
     append [] ys = ys
@@ -957,7 +947,7 @@ main = do word <- getLine
   \begin{lstlisting}[language=Idris]
     Main.elem_to_concat : elem
 
-    Main.rest_of_vect : Vect (plus k m) elem
+    Main.rest_of_vect : Vect (k + m) elem
   \end{lstlisting}
 \end{frame}
 
@@ -1055,7 +1045,7 @@ main = do word <- getLine
 
   Huh... I guess it doesn't realize that append should make a list as long as the inputs combined!
 
-  \pause \\~\\
+  \\~\\
   Idris just finds the first possible function. Length isn't encoded in the type to enforce length of output.
 \end{frame}
 
@@ -1080,8 +1070,6 @@ main = do word <- getLine
        FZ : Fin (S k)
        FS : Fin k -> Fin (S k)
      \end{lstlisting}
-
-   \pause
 \end{frame}
 
 \begin{frame}[fragile]
@@ -1234,9 +1222,25 @@ main = do word <- getLine
 \end{frame}
 
 \begin{frame}
-  \frametitle{Proof rules}
+  \frametitle{Proof and inference rules}
 
   You also have some rules for how you can combine these things to form proofs. E.g., Modus ponens
+
+  \[p \rightarrow q, p \vdash q\]
+
+  \pause
+
+  Or conjunction elimination
+
+  \[p \wedge q \vdash p\]
+
+  \[p \wedge q \vdash q\]
+
+  \pause
+
+  Or conjunction introduction
+
+  \[p, q \vdash p \wedge q\]
 \end{frame}
 
 \begin{frame}[fragile]
@@ -1302,7 +1306,7 @@ main = do word <- getLine
 
 \begin{frame}[fragile]
   \frametitle{Valuable proofs}
-  If types are propositions, then what are the vaues?
+  If types are propositions, then what are the values?
 
   \pause \\~\\
   Well, they're a sort of ``existence proof'' of a proposition.
