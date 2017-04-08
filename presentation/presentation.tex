@@ -428,9 +428,9 @@ showstringspaces=false}
   \end{lstlisting}
 
   \begin{itemize}
-  \item You know \texttt{whichIndex} can yield a ``null'' value (\textt{Nothing}). Just from type.
+  \item You know \texttt{whichIndex} can yield a ``null'' value (\texttt{Nothing}). Just from type.
   \item Could also be a \texttt{Just <Integer>}, such as \texttt{Just 3}.
-  \item You have to explicitly unwrap these values (see \textt{main}) to get at the possible value!
+  \item You have to explicitly unwrap these values (see \texttt{main}) to get at the possible value!
   \end{itemize}
 \end{frame}
 
@@ -536,7 +536,6 @@ main = do word <- getLine
   \end{lstlisting}
 
   \begin{itemize}
-  \pause
   \item \texttt{IO} means a function performs input / output.
     \begin{itemize}
     \pause
@@ -586,7 +585,7 @@ main = do word <- getLine
     \begin{itemize}
     \item ``This function does not alter global state, or read from a file''.
     \item Functions are ``pure''.
-    \item Special actions, like \textt{IO}, are clearly labeled.
+    \item Special actions, like \texttt{IO}, are clearly labeled.
     \end{itemize} 
   \end{itemize}
 \end{frame}
@@ -715,7 +714,7 @@ main = do word <- getLine
   \item Two constructors define the type recursively (called an inductive type -- we'll see why later).
     \begin{itemize}
     \item One for the empty vector.
-    \item Single value concatenated to another vector to make a vector with 1 more element. \textt{S} is successor of natural numbers, +1.
+    \item Single value concatenated to another vector to make a vector with 1 more element. \texttt{S} is successor of natural numbers, +1.
     \end{itemize}
   \end{itemize}
 \end{frame}
@@ -1630,6 +1629,15 @@ main = do word <- getLine
   \pause \\~\\
 
   So, now we just need to add \texttt{S} to both sides of this... Hmmm...
+
+  \begin{lstlisting}[language=Idris]
+     - + Main.plus_assoc_rhs_2 [P]
+      `__                      k : Nat
+                               y : Nat
+                               z : Nat
+          ------------------------------------------------------------
+           Main.plus_assoc_rhs_2 : S (k + (y + z)) = S ((k + y) + z)
+  \end{lstlisting}
 \end{frame}
 
 \begin{frame}[fragile]
