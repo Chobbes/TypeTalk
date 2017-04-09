@@ -4,6 +4,31 @@
 \usepackage{listings}
 \usepackage{color}
 
+\usepackage[backend=bibtex]{biblatex}
+\addbibresource{citations.bib}
+
+% http://tex.stackexchange.com/questions/68080/beamer-bibliography-icon
+\setbeamertemplate{bibliography item}{%
+  \ifboolexpr{ test {\ifentrytype{book}} or test {\ifentrytype{mvbook}}
+    or test {\ifentrytype{collection}} or test {\ifentrytype{mvcollection}}
+    or test {\ifentrytype{reference}} or test {\ifentrytype{mvreference}} }
+    {\setbeamertemplate{bibliography item}[book]}
+    {\ifentrytype{online}
+       {\setbeamertemplate{bibliography item}[online]}
+       {\setbeamertemplate{bibliography item}[article]}}%
+  \usebeamertemplate{bibliography item}}
+
+\defbibenvironment{bibliography}
+  {\list{}
+     {\settowidth{\labelwidth}{\usebeamertemplate{bibliography item}}%
+      \setlength{\leftmargin}{\labelwidth}%
+      \setlength{\labelsep}{\biblabelsep}%
+      \addtolength{\leftmargin}{\labelsep}%
+      \setlength{\itemsep}{\bibitemsep}%
+      \setlength{\parsep}{\bibparsep}}}
+  {\endlist}
+  {\item}
+
 % Colours for beamer.
 \setbeamercolor{frametitle}{fg=orange}
 \setbeamertemplate{itemize item}{\color{orange}$\blacksquare$}
@@ -1712,11 +1737,8 @@ main = do word <- getLine
 \begin{frame}
   \frametitle{References}
 
-  \begin{itemize}
-  \item Propositions as Types
-  \item Type-Driven Development
-  \item Software Foundations
-  \end{itemize}
+  \nocite{*}
+  \printbibliography
 
   These are all good resources! You should look at them!
 \end{frame}
