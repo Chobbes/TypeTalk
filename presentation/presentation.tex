@@ -815,9 +815,9 @@ main = do word <- getLine
                       m : Nat
                      ys : Vect m elem
                     len : Nat
-                     xs : Vect len elem
+                     xs : Vect k elem
      ------------------------------------------------
-      Main.append_rhs_2 : Vect ((S len) + m) elem
+      Main.append_rhs_2 : Vect ((S k) + m) elem
   \end{lstlisting}
 \end{frame}
 
@@ -1547,7 +1547,7 @@ main = do word <- getLine
   
   \begin{lstlisting}[language=Idris]
     plus_assoc : (x, y, z : Nat) -> x + (y + z) = (x + y) + z
-    plus_assoc Z y z = ?plus_assoc_rhs_1
+    plus_assoc 0 y z = ?plus_assoc_rhs_1
     plus_assoc (S k) y z = ?plus_assoc_rhs_2
   \end{lstlisting}
 
